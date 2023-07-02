@@ -85,6 +85,12 @@ httpxUtilz supports the following command-line arguments:
 ./httpxUtilz -url https://www.hackerone.com -proxy http://127.0.0.1:1080 -usehttps true -followredirects true -maxredirects 5 -method POST -randomuseragent true -headers "Authorization: Bearer token" -followsamehost true -processes 2 -rateLimit 100 -res true -resultFile result.json
 ```
 
+## As Library
+
+```
+go get -u https://github.com/sherlock1cat/httpxUtilz@latest
+```
+
 ## Notes
 
 - Make sure you have Go programming language environment installed.
