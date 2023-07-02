@@ -61,14 +61,8 @@ func GetCDNInfoByIps(ips string) (cdn int, cdnbyip bool) {
 
 		if matched {
 			//log.Println(ip, "is a", val)
-			cdn = 1
 			cdnbyip = true
 			return
-		} else {
-			//log.Println(ip, "is not a CDN")
-			cdn = 0
-			cdnbyip = true
-			continue
 		}
 	}
 	return
@@ -87,7 +81,6 @@ func GetCDNInfoByHeader(resp *Response, CdnHeaderfilename string) (cdn int, cdnb
 			}
 		}
 		if value := resp.Headers.Get(header); value != "" {
-			cdn = 1
 			cdnbyheader = header + ":" + value + ","
 		}
 	}
@@ -104,7 +97,6 @@ func GetCDNInfoByCidr(cidr string, CdnCidrfilename string) (cdn int, cdnbycidr b
 	for _, checkCidr := range cidrRange {
 		for _, value := range cdnCidrs {
 			if value == checkCidr && value != "" {
-				cdn = 1
 				cdnbycidr = true
 				return
 			}
@@ -125,7 +117,6 @@ func GetCDNInfoByAsn(asn, CdnAsnfilename string) (cdn int, cdnbyasn bool) {
 	for _, checkAsn := range asnRange {
 		for _, value := range cdnAsn {
 			if value == checkAsn && value != "" {
-				cdn = 1
 				cdnbyasn = true
 				return
 			}
