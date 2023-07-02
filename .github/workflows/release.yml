@@ -2,28 +2,26 @@ name: build
 
 on:
   push:
-    branches:
-      - main
     tags:
-      - 'v*.*.*'
+      - '*'
+  workflow_dispatch:
 
-jobs:
-  build-httpxUtilz:
+jobs: 
+  release: 
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
 
-      - name: Setup Golang
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.19.3
+    steps: 
+      - uses: actions/checkout@v3
+        with: 
+          fetch-depth: 0
 
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4
-        with:
+      - uses: actions/setup-go@v4
+        with: 
+          go-version: 1.20.x
+
+      - uses: goreleaser/goreleaser-action@v4
+        with: 
+          args: "release --rm-dist"
           version: latest
-          args: release --clean --snapshot --rm-dist --release-notes=CHANGELOG.md --release-header=header.tpl --release-footer=footer.tpl
-          workdir: cmd/httpxUtilz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env: 
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
