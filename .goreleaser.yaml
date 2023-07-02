@@ -31,7 +31,3 @@ archives:
   
 checksum:
   algorithm: sha256
-
-files:
-  - path: ./data
-    stripComponents: 1
