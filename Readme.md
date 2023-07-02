@@ -42,6 +42,7 @@ You can install the dependencies using the following command:
 4. Run the generated executable file.
 
    ```
+   # Determine the ./data directory in the current directory.
    ./cmd/httpxUtilz -h
    ```
 
