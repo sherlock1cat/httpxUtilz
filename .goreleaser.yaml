@@ -23,13 +23,12 @@ builds:
 
   flags:
     - -trimpath
-  replacements:
-      darwin: macOS
+  
 
 archives:
 - format: zip
   id: httpxUtilz
   builds: [httpxUtilz]
-
+  
 checksum:
   algorithm: sha256
