@@ -15,9 +15,9 @@ Make sure to install these dependencies before building and running httpxUtilz.
 
 You can install the dependencies using the following command:
 
-    ```
-    go mod tidy
-    ```
+   ```
+   go mod tidy
+   ```
 
 ## Installation
 
