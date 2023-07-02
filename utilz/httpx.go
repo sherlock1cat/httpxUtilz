@@ -32,13 +32,13 @@ import (
 //}
 
 type Response struct {
-	Raw     string
-	Data    []byte
-	Headers http.Header
-	Status  int
+	Raw                    string
+	Data                   []byte
+	Headers                http.Header
+	Status                 int
+	ContentLength          int64
+	ContentLengthByAllBody int64
 }
-
-// httpxUtilz -u hackerone.com -title -server -status-code -tech-detect -ip -cname -asn -cdn -duc
 
 func (config *RequestClientConfig) GetResponseByUrl(targetUrl string) (*Response, error) {
 	target, err := parseUrl(targetUrl)
@@ -61,10 +61,12 @@ func (config *RequestClientConfig) GetResponseByUrl(targetUrl string) (*Response
 	}
 
 	return &Response{
-		Raw:     string(body),
-		Data:    body,
-		Headers: resp.Header,
-		Status:  resp.StatusCode,
+		Raw:                    string(body),
+		Data:                   body,
+		Headers:                resp.Header,
+		Status:                 resp.StatusCode,
+		ContentLength:          resp.ContentLength,
+		ContentLengthByAllBody: int64(len(body)),
 	}, nil
 }
 
@@ -97,10 +99,10 @@ func (config *RequestClientConfig) GetServerByResponse(resp *Response) (Banner s
 	return
 }
 
-func (config *RequestClientConfig) GetServerAllHeaderByResponse(resp *Response) (responseheader []string) {
+func (config *RequestClientConfig) GetServerAllHeaderByResponse(resp *Response) (responseHeader []string) {
 	for key, values := range resp.Headers {
 		for _, value := range values {
-			responseheader = append(responseheader, fmt.Sprintf("%s: %s", key, value))
+			responseHeader = append(responseHeader, fmt.Sprintf("%s: %s", key, value))
 		}
 	}
 
@@ -109,6 +111,16 @@ func (config *RequestClientConfig) GetServerAllHeaderByResponse(resp *Response) 
 
 func (config *RequestClientConfig) GetStatusByResponse(resp *Response) (Status int) {
 	Status = resp.Status
+	return
+}
+
+func (config *RequestClientConfig) GetContentLengthByResponse(resp *Response) (contentLength int64) {
+	contentLength = resp.ContentLength
+	return
+}
+
+func (config *RequestClientConfig) GetContentLengthAllBodyByResponse(resp *Response) (contentLengthByAllBody int64) {
+	contentLengthByAllBody = resp.ContentLengthByAllBody
 	return
 }
 
@@ -131,7 +143,7 @@ func (config *RequestClientConfig) GetCdnInfoByAll(resp *Response, ips, CdnHeade
 	if (cdnbyip) || (len(cdnbyheader) > 0) || (cdnbycidr) || (cdnbyasn) || (cdnbycname) {
 		cdn = 1
 	}
-	
+
 	return
 }
 
