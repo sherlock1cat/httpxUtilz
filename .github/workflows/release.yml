@@ -20,7 +20,7 @@ jobs:
           go-version: 1.19.3
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4
+        uses: goreleaser/goreleaser-action@v4.1.0
         with:
           version: latest
           args: release --clean --snapshot --rm-dist --release-notes=CHANGELOG.md --release-header=header.tpl --release-footer=footer.tpl --release-asset={{ .ArtifactName }}
