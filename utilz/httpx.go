@@ -118,16 +118,20 @@ func (config *RequestClientConfig) GetCNameIPByDomain(domain string, resolversFi
 }
 
 func (config *RequestClientConfig) GetCdnInfoByAll(resp *Response, ips, CdnHeaderfilename, cidr, CdnCidrfilename, asn, CdnAsnfilename, cname, CdnCNamefilename string) (cdn int, cdnbyip bool, cdnbyheader string, cdnbycidr, cdnbyasn, cdnbycname bool) {
-	cdn, cdnbyip = GetCDNInfoByIps(ips)
+	_, cdnbyip = GetCDNInfoByIps(ips)
 
-	cdn, cdnbyheader = GetCDNInfoByHeader(resp, CdnHeaderfilename)
+	_, cdnbyheader = GetCDNInfoByHeader(resp, CdnHeaderfilename)
 
-	cdn, cdnbycidr = GetCDNInfoByCidr(cidr, CdnCidrfilename)
+	_, cdnbycidr = GetCDNInfoByCidr(cidr, CdnCidrfilename)
 
-	cdn, cdnbyasn = GetCDNInfoByAsn(asn, CdnAsnfilename)
+	_, cdnbyasn = GetCDNInfoByAsn(asn, CdnAsnfilename)
 
-	cdn, cdnbycname = GetCDNInfoByCName(cname, CdnCNamefilename)
+	_, cdnbycname = GetCDNInfoByCName(cname, CdnCNamefilename)
 
+	if (cdnbyip) || (len(cdnbyheader) > 0) || (cdnbycidr) || (cdnbyasn) || (cdnbycname) {
+		cdn = 1
+	}
+	
 	return
 }
 
