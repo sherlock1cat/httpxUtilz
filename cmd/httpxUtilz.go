@@ -13,19 +13,23 @@ import (
 )
 
 type Result struct {
-	Url        string `json:"url"`
-	Title      string `json:"title"`
-	Banner     string `json:"banner"`
-	StatusCode int    `json:"statusCode"`
-	CName      string `json:"cname"`
-	IP         string `json:"ip"`
-	Alive      int    `json:"alive"`
-	Cdn        int    `json:"cdn"`
-	CdnInfo    string `json:"cdnInfo"`
-	Cidr       string `json:"cidr"`
-	Asn        string `json:"asn"`
-	Org        string `json:"org"`
-	Addr       string `json:"addr"`
+	Url         string `json:"url"`
+	Title       string `json:"title"`
+	Banner      string `json:"banner"`
+	StatusCode  int    `json:"statusCode"`
+	CName       string `json:"cname"`
+	IP          string `json:"ip"`
+	Alive       int    `json:"alive"`
+	Cdn         int    `json:"cdn"`
+	CdnByIP     bool   `json:"cdn_by_ip"`
+	CdnByHeader string `json:"cdn_by_header"`
+	CdnByCidr   bool   `json:"cdn_by_cidr"`
+	CdnByAsn    bool   `json:"cdn_by_asn"`
+	CdnByCName  bool   `json:"cdn_by_cname"`
+	Cidr        string `json:"cidr"`
+	Asn         string `json:"asn"`
+	Org         string `json:"org"`
+	Addr        string `json:"addr"`
 }
 
 func readURLsFromFile(filename string) ([]string, error) {
@@ -120,10 +124,16 @@ func processURL(url, proxy string, usehttps bool, followredirects bool, maxredir
 	}
 	cidr, asn, org, addr := config.GetAsnInfoByIp(ips, proxy)
 
-	var cdn int
-	var CdnInfo string
+	var (
+		cdn         int
+		cdnbyip     bool
+		cdnbyheader string
+		cdnbycidr   bool
+		cdnbyasn    bool
+		cdnbycname  bool
+	)
 	if len(ips) > 0 {
-		cdn, CdnInfo = config.GetCdnInfoByAll(
+		cdn, cdnbyip, cdnbyheader, cdnbycidr, cdnbyasn, cdnbycname = config.GetCdnInfoByAll(
 			resp, ips, "./data/cdn_header_keys.json",
 			cidr, "./data/cdn_ip_cidr.json",
 			asn, "./data/cdn_asn_list.json",
@@ -131,19 +141,23 @@ func processURL(url, proxy string, usehttps bool, followredirects bool, maxredir
 	}
 
 	result = Result{
-		Url:        url,
-		Title:      title,
-		Banner:     Banner,
-		StatusCode: statuscode,
-		CName:      cname,
-		IP:         ips,
-		Alive:      alive,
-		Cdn:        cdn,
-		CdnInfo:    CdnInfo,
-		Cidr:       cidr,
-		Asn:        asn,
-		Org:        org,
-		Addr:       addr,
+		Url:         url,
+		Title:       title,
+		Banner:      Banner,
+		StatusCode:  statuscode,
+		CName:       cname,
+		IP:          ips,
+		Alive:       alive,
+		Cdn:         cdn,
+		CdnByIP:     cdnbyip,
+		CdnByHeader: cdnbyheader,
+		CdnByCidr:   cdnbycidr,
+		CdnByAsn:    cdnbyasn,
+		CdnByCName:  cdnbycname,
+		Cidr:        cidr,
+		Asn:         asn,
+		Org:         org,
+		Addr:        addr,
 	}
 	return
 }

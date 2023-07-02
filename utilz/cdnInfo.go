@@ -43,7 +43,7 @@ func ReadCNameJSONFile(filename string) (map[string]string, error) {
 	return value, nil
 }
 
-func GetCDNInfoByIps(ips string) (cdn int, CdnInfo string) {
+func GetCDNInfoByIps(ips string) (cdn int, cdnbyip bool) {
 	client := cdncheck.New()
 	ipList := strings.Split(ips, ",")
 
@@ -53,7 +53,7 @@ func GetCDNInfoByIps(ips string) (cdn int, CdnInfo string) {
 			//log.Println("GetCDNInfoByIps: Invalid IP address: ", ipStr)
 			continue
 		}
-		matched, val, err := client.CheckCDN(ip)
+		matched, _, err := client.CheckCDN(ip)
 		if err != nil {
 			//log.Println("GetCDNInfoByIps: ", err)
 			continue
@@ -62,19 +62,19 @@ func GetCDNInfoByIps(ips string) (cdn int, CdnInfo string) {
 		if matched {
 			//log.Println(ip, "is a", val)
 			cdn = 1
-			CdnInfo = val
+			cdnbyip = true
 			return
 		} else {
 			//log.Println(ip, "is not a CDN")
 			cdn = 0
-			CdnInfo = ""
+			cdnbyip = true
 			continue
 		}
 	}
 	return
 }
 
-func GetCDNInfoByHeader(resp *Response, CdnHeaderfilename string) (cdn int, CdnInfo string) {
+func GetCDNInfoByHeader(resp *Response, CdnHeaderfilename string) (cdn int, cdnbyheader string) {
 	cdnHeaders, err := ReadJSONFile(CdnHeaderfilename)
 	if err != nil {
 		log.Fatal("GetCDNInfoByHeader: Failed to process the JSON file：", err)
@@ -83,18 +83,18 @@ func GetCDNInfoByHeader(resp *Response, CdnHeaderfilename string) (cdn int, CdnI
 	for _, header := range cdnHeaders {
 		if cdn == 1 {
 			if value := resp.Headers.Get(header); value != "" {
-				CdnInfo += value + ","
+				cdnbyheader += header + ":" + value + ","
 			}
 		}
 		if value := resp.Headers.Get(header); value != "" {
 			cdn = 1
-			CdnInfo = "CDN_Headers: " + header + ","
+			cdnbyheader = header + ":" + value + ","
 		}
 	}
 	return
 }
 
-func GetCDNInfoByCidr(cidr string, CdnCidrfilename string) (cdn int, CdnInfo string) {
+func GetCDNInfoByCidr(cidr string, CdnCidrfilename string) (cdn int, cdnbycidr bool) {
 	cdnCidrs, err := ReadJSONFile(CdnCidrfilename)
 	if err != nil {
 		log.Fatal("GetCDNInfoByCidr: Encountered an error while processing the JSON file：", err)
@@ -105,7 +105,7 @@ func GetCDNInfoByCidr(cidr string, CdnCidrfilename string) (cdn int, CdnInfo str
 		for _, value := range cdnCidrs {
 			if value == checkCidr && value != "" {
 				cdn = 1
-				CdnInfo = "CDN_Cidr: true" + ","
+				cdnbycidr = true
 				return
 			}
 		}
@@ -114,7 +114,7 @@ func GetCDNInfoByCidr(cidr string, CdnCidrfilename string) (cdn int, CdnInfo str
 	return
 }
 
-func GetCDNInfoByAsn(asn, CdnAsnfilename string) (cdn int, CdnInfo string) {
+func GetCDNInfoByAsn(asn, CdnAsnfilename string) (cdn int, cdnbyasn bool) {
 	cdnAsn, err := ReadJSONFile(CdnAsnfilename)
 	if err != nil {
 		log.Fatal("GetCDNInfoByAsn: Failed to handle the JSON file：", err)
@@ -126,7 +126,7 @@ func GetCDNInfoByAsn(asn, CdnAsnfilename string) (cdn int, CdnInfo string) {
 		for _, value := range cdnAsn {
 			if value == checkAsn && value != "" {
 				cdn = 1
-				CdnInfo = "CDN_Asn: true" + ","
+				cdnbyasn = true
 				return
 			}
 		}
@@ -135,25 +135,26 @@ func GetCDNInfoByAsn(asn, CdnAsnfilename string) (cdn int, CdnInfo string) {
 	return
 }
 
-func GetCDNInfoByCName(cname, CdnCNamefilename string) (cdn int, CdnInfo string) {
+func GetCDNInfoByCName(cname, CdnCNamefilename string) (cdn int, cdnbycname bool) {
 	cnameMap, err := ReadCNameJSONFile(CdnCNamefilename)
 	if err != nil {
-		log.Fatal("GetCDNInfoByAsn: 处理Json文件失败：", err)
+		log.Fatal("GetCDNInfoByAsn: Failed to handle the JSON file：", err)
 		return
 	}
 
 	cnameRange := strings.Split(cname, ",")
 	for _, checkCName := range cnameRange {
-		Info, ok := cnameMap[checkCName]
+		_, ok := cnameMap[checkCName]
 		if !ok {
 			continue
 		}
 		if cdn == 0 {
 			cdn = 1
-			CdnInfo = "Cdn_cname: " + Info + ","
+			cdnbycname = true
 		} else {
-			CdnInfo += Info + ","
+			cdnbycname = true
 		}
+		break
 
 	}
 

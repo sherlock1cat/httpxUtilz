@@ -106,30 +106,17 @@ func (config *RequestClientConfig) GetCNameIPByDomain(domain string, resolversFi
 	return
 }
 
-func (config *RequestClientConfig) GetCdnInfoByAll(resp *Response, ips, CdnHeaderfilename, cidr, CdnCidrfilename, asn, CdnAsnfilename, cname, CdnCNamefilename string) (cdn int, CdnInfo string) {
-	cdn, CdnInfo = GetCDNInfoByIps(ips)
-	if cdn == 0 {
-		// check cdn by response header
-		cdn, CdnInfo = GetCDNInfoByHeader(resp, CdnHeaderfilename)
-	}
-	if cdn == 0 {
-		cdn, CdnInfo = GetCDNInfoByCidr(cidr, CdnCidrfilename)
-	} else {
-		_, info := GetCDNInfoByCidr(cidr, CdnCidrfilename)
-		CdnInfo += info
-	}
-	if cdn == 0 {
-		cdn, CdnInfo = GetCDNInfoByAsn(asn, CdnAsnfilename)
-	} else {
-		_, info := GetCDNInfoByAsn(cidr, CdnAsnfilename)
-		CdnInfo += info
-	}
-	if cdn == 0 {
-		cdn, CdnInfo = GetCDNInfoByCName(cname, CdnCNamefilename)
-	} else {
-		_, info := GetCDNInfoByCName(cname, CdnCNamefilename)
-		CdnInfo += info
-	}
+func (config *RequestClientConfig) GetCdnInfoByAll(resp *Response, ips, CdnHeaderfilename, cidr, CdnCidrfilename, asn, CdnAsnfilename, cname, CdnCNamefilename string) (cdn int, cdnbyip bool, cdnbyheader string, cdnbycidr, cdnbyasn, cdnbycname bool) {
+	cdn, cdnbyip = GetCDNInfoByIps(ips)
+
+	cdn, cdnbyheader = GetCDNInfoByHeader(resp, CdnHeaderfilename)
+
+	cdn, cdnbycidr = GetCDNInfoByCidr(cidr, CdnCidrfilename)
+
+	cdn, cdnbyasn = GetCDNInfoByAsn(asn, CdnAsnfilename)
+
+	cdn, cdnbycname = GetCDNInfoByCName(cname, CdnCNamefilename)
+
 	return
 }
 
