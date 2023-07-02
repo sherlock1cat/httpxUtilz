@@ -23,7 +23,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v4
         with:
           version: latest
-          args: release --clean --snapshot
+          args: release --clean --snapshot --rm-dist --release-notes=CHANGELOG.md --release-header=header.tpl --release-footer=footer.tpl --release-asset={{ .ArtifactName }}
           workdir: cmd/httpxUtilz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
