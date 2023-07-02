@@ -1,6 +1,7 @@
 package utilz
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -93,6 +94,16 @@ func (config *RequestClientConfig) GetServerByResponse(resp *Response) (Banner s
 	if len(power) > 0 {
 		Banner += power
 	}
+	return
+}
+
+func (config *RequestClientConfig) GetServerAllHeaderByResponse(resp *Response) (responseheader []string) {
+	for key, values := range resp.Headers {
+		for _, value := range values {
+			responseheader = append(responseheader, fmt.Sprintf("%s: %s", key, value))
+		}
+	}
+
 	return
 }
 

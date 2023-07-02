@@ -13,23 +13,24 @@ import (
 )
 
 type Result struct {
-	Url         string `json:"url"`
-	Title       string `json:"title"`
-	Banner      string `json:"banner"`
-	StatusCode  int    `json:"statusCode"`
-	CName       string `json:"cname"`
-	IP          string `json:"ip"`
-	Alive       int    `json:"alive"`
-	Cdn         int    `json:"cdn"`
-	CdnByIP     bool   `json:"cdn_by_ip"`
-	CdnByHeader string `json:"cdn_by_header"`
-	CdnByCidr   bool   `json:"cdn_by_cidr"`
-	CdnByAsn    bool   `json:"cdn_by_asn"`
-	CdnByCName  bool   `json:"cdn_by_cname"`
-	Cidr        string `json:"cidr"`
-	Asn         string `json:"asn"`
-	Org         string `json:"org"`
-	Addr        string `json:"addr"`
+	Url            string   `json:"url"`
+	Title          string   `json:"title"`
+	Banner         string   `json:"banner"`
+	StatusCode     int      `json:"statusCode"`
+	CName          string   `json:"cname"`
+	IP             string   `json:"ip"`
+	Alive          int      `json:"alive"`
+	ResponseHeader []string `json:"response_header"`
+	Cdn            int      `json:"cdn"`
+	CdnByIP        bool     `json:"cdn_by_ip"`
+	CdnByHeader    string   `json:"cdn_by_header"`
+	CdnByCidr      bool     `json:"cdn_by_cidr"`
+	CdnByAsn       bool     `json:"cdn_by_asn"`
+	CdnByCName     bool     `json:"cdn_by_cname"`
+	Cidr           string   `json:"cidr"`
+	Asn            string   `json:"asn"`
+	Org            string   `json:"org"`
+	Addr           string   `json:"addr"`
 }
 
 func readURLsFromFile(filename string) ([]string, error) {
@@ -117,6 +118,7 @@ func processURL(url, proxy string, usehttps bool, followredirects bool, maxredir
 	title := config.GetTitleByResponse(resp)
 	Banner := config.GetServerByResponse(resp)
 	statuscode := config.GetStatusByResponse(resp)
+	responseheader := config.GetServerAllHeaderByResponse(resp)
 	cname, ips := config.GetCNameIPByDomain(url, "./data/vaildResolvers.txt")
 	alive := config.GetAliveByResponse(resp)
 	if len(ips) == 0 {
@@ -141,23 +143,24 @@ func processURL(url, proxy string, usehttps bool, followredirects bool, maxredir
 	}
 
 	result = Result{
-		Url:         url,
-		Title:       title,
-		Banner:      Banner,
-		StatusCode:  statuscode,
-		CName:       cname,
-		IP:          ips,
-		Alive:       alive,
-		Cdn:         cdn,
-		CdnByIP:     cdnbyip,
-		CdnByHeader: cdnbyheader,
-		CdnByCidr:   cdnbycidr,
-		CdnByAsn:    cdnbyasn,
-		CdnByCName:  cdnbycname,
-		Cidr:        cidr,
-		Asn:         asn,
-		Org:         org,
-		Addr:        addr,
+		Url:            url,
+		Title:          title,
+		Banner:         Banner,
+		StatusCode:     statuscode,
+		CName:          cname,
+		IP:             ips,
+		Alive:          alive,
+		ResponseHeader: responseheader,
+		Cdn:            cdn,
+		CdnByIP:        cdnbyip,
+		CdnByHeader:    cdnbyheader,
+		CdnByCidr:      cdnbycidr,
+		CdnByAsn:       cdnbyasn,
+		CdnByCName:     cdnbycname,
+		Cidr:           cidr,
+		Asn:            asn,
+		Org:            org,
+		Addr:           addr,
 	}
 	return
 }
