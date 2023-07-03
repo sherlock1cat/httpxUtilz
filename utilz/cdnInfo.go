@@ -2,6 +2,7 @@ package utilz
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/projectdiscovery/cdncheck"
 	"io/ioutil"
 	"log"
@@ -68,20 +69,15 @@ func GetCDNInfoByIps(ips string) (cdn int, cdnbyip bool) {
 	return
 }
 
-func GetCDNInfoByHeader(resp *Response, CdnHeaderfilename string) (cdn int, cdnbyheader string) {
+func GetCDNInfoByHeader(resp *Response, CdnHeaderfilename string) (cdn int, cdnbyheader []string) {
 	cdnHeaders, err := ReadJSONFile(CdnHeaderfilename)
 	if err != nil {
 		log.Fatal("GetCDNInfoByHeader: Failed to process the JSON file：", err)
 		return
 	}
 	for _, header := range cdnHeaders {
-		if cdn == 1 {
-			if value := resp.Headers.Get(header); value != "" {
-				cdnbyheader += header + ":" + value + ","
-			}
-		}
 		if value := resp.Headers.Get(header); value != "" {
-			cdnbyheader = header + ":" + value + ","
+			cdnbyheader = append(cdnbyheader, fmt.Sprintf("%s: %s", header, value))
 		}
 	}
 	return

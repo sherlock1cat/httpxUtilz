@@ -13,18 +13,18 @@ import (
 )
 
 type PassiveResult struct {
-	CName       string `json:"cname"`
-	IP          string `json:"ip"`
-	Cdn         int    `json:"cdn"`
-	CdnByIP     bool   `json:"cdn_by_ip"`
-	CdnByHeader string `json:"cdn_by_header"`
-	CdnByCidr   bool   `json:"cdn_by_cidr"`
-	CdnByAsn    bool   `json:"cdn_by_asn"`
-	CdnByCName  bool   `json:"cdn_by_cname"`
-	Cidr        string `json:"cidr"`
-	Asn         string `json:"asn"`
-	Org         string `json:"org"`
-	Addr        string `json:"addr"`
+	CName       string   `json:"cname"`
+	IP          string   `json:"ip"`
+	Cdn         int      `json:"cdn"`
+	CdnByIP     bool     `json:"cdn_by_ip"`
+	CdnByHeader []string `json:"cdn_by_header"`
+	CdnByCidr   bool     `json:"cdn_by_cidr"`
+	CdnByAsn    bool     `json:"cdn_by_asn"`
+	CdnByCName  bool     `json:"cdn_by_cname"`
+	Cidr        string   `json:"cidr"`
+	Asn         string   `json:"asn"`
+	Org         string   `json:"org"`
+	Addr        string   `json:"addr"`
 }
 
 type ResponseResult struct {
@@ -147,7 +147,7 @@ func processURL(url, proxy string, usehttps bool, followredirects bool, maxredir
 	var (
 		cdn          int
 		cdnbyip      bool
-		cdnbyheader  string
+		cdnbyheader  []string
 		cdnbycidr    bool
 		cdnbyasn     bool
 		cdnbycname   bool
