@@ -24,6 +24,7 @@ var (
 	rateLimit       int
 	res             bool
 	resultFile      string
+	passive         bool
 )
 
 func init() {
@@ -41,6 +42,7 @@ func init() {
 	flag.IntVar(&rateLimit, "rateLimit", 100, "Rate limit.")
 	flag.BoolVar(&res, "res", false, "Default not save result.")
 	flag.StringVar(&resultFile, "resultFile", "", "Default save to ./result.json.")
+	flag.BoolVar(&passive, "passive", false, "Default not get passive info data.")
 	flag.Parse()
 }
 
@@ -57,12 +59,12 @@ func main() {
 			fmt.Println("Unable to read from the pipe input:", err)
 			return
 		}
-		cmd.ProcessURLFromPipe(urlPipe, proxy, usehttps, followredirects, maxredirects, method, randomuseragent, headers, followredirects, timeout, processes, rateLimit, res, resultFile)
+		cmd.ProcessURLFromPipe(urlPipe, proxy, usehttps, followredirects, maxredirects, method, randomuseragent, headers, followredirects, timeout, processes, rateLimit, res, resultFile, passive)
 	} else {
 		if url != "" {
-			cmd.ProcessURLFromLine(url, proxy, usehttps, followredirects, maxredirects, method, randomuseragent, headers, followredirects, timeout, rateLimit, res, resultFile)
+			cmd.ProcessURLFromLine(url, proxy, usehttps, followredirects, maxredirects, method, randomuseragent, headers, followredirects, timeout, rateLimit, res, resultFile, passive)
 		} else if urls != "" {
-			cmd.ProcessURLFromGroup(urls, proxy, usehttps, followredirects, maxredirects, method, randomuseragent, headers, followredirects, timeout, processes, rateLimit, res, resultFile)
+			cmd.ProcessURLFromGroup(urls, proxy, usehttps, followredirects, maxredirects, method, randomuseragent, headers, followredirects, timeout, processes, rateLimit, res, resultFile, passive)
 		} else {
 			flag.Usage()
 		}

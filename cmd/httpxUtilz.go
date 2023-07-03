@@ -12,27 +12,35 @@ import (
 	"time"
 )
 
-type Result struct {
+type PassiveResult struct {
+	CName       string `json:"cname"`
+	IP          string `json:"ip"`
+	Cdn         int    `json:"cdn"`
+	CdnByIP     bool   `json:"cdn_by_ip"`
+	CdnByHeader string `json:"cdn_by_header"`
+	CdnByCidr   bool   `json:"cdn_by_cidr"`
+	CdnByAsn    bool   `json:"cdn_by_asn"`
+	CdnByCName  bool   `json:"cdn_by_cname"`
+	Cidr        string `json:"cidr"`
+	Asn         string `json:"asn"`
+	Org         string `json:"org"`
+	Addr        string `json:"addr"`
+}
+
+type ResponseResult struct {
 	Url                    string   `json:"url"`
 	Title                  string   `json:"title"`
 	Banner                 string   `json:"banner"`
 	StatusCode             int      `json:"statusCode"`
-	CName                  string   `json:"cname"`
-	IP                     string   `json:"ip"`
 	Alive                  int      `json:"alive"`
 	ContentLength          int64    `json:"content_length"`
 	ContentLengthByAllBody int64    `json:"content_length_by_all_body"`
 	ResponseHeader         []string `json:"response_header"`
-	Cdn                    int      `json:"cdn"`
-	CdnByIP                bool     `json:"cdn_by_ip"`
-	CdnByHeader            string   `json:"cdn_by_header"`
-	CdnByCidr              bool     `json:"cdn_by_cidr"`
-	CdnByAsn               bool     `json:"cdn_by_asn"`
-	CdnByCName             bool     `json:"cdn_by_cname"`
-	Cidr                   string   `json:"cidr"`
-	Asn                    string   `json:"asn"`
-	Org                    string   `json:"org"`
-	Addr                   string   `json:"addr"`
+}
+
+type Result struct {
+	BaseInfo    ResponseResult `json:"base_info"`
+	PassiveInfo PassiveResult  `json:"passive_info"`
 }
 
 func readURLsFromFile(filename string) ([]string, error) {
@@ -96,7 +104,7 @@ func saveResultsToFile(results []Result, resultFile string) {
 	log.Println("results saved to", resultFile)
 }
 
-func processURL(url, proxy string, usehttps bool, followredirects bool, maxredirects int, method string, randomuseragent bool, headers string, followsamehost bool, timeout int) (result Result) {
+func processURL(url, proxy string, usehttps bool, followredirects bool, maxredirects int, method string, randomuseragent bool, headers string, followsamehost bool, timeout int, passive bool) (result Result) {
 	config := httpxUtilz.RequestClientConfig{
 		ProxyURL:        proxy,
 		UseHTTPS:        usehttps,
@@ -123,55 +131,67 @@ func processURL(url, proxy string, usehttps bool, followredirects bool, maxredir
 	contentLength := config.GetContentLengthByResponse(resp)
 	contentLengthByAllBody := config.GetContentLengthAllBodyByResponse(resp)
 	responseHeader := config.GetServerAllHeaderByResponse(resp)
-	cname, ips := config.GetCNameIPByDomain(url, "./data/vaildResolvers.txt")
 	alive := config.GetAliveByResponse(resp)
-	if len(ips) == 0 {
-		return Result{}
-	}
-	cidr, asn, org, addr := config.GetAsnInfoByIp(ips, proxy)
 
-	var (
-		cdn         int
-		cdnbyip     bool
-		cdnbyheader string
-		cdnbycidr   bool
-		cdnbyasn    bool
-		cdnbycname  bool
-	)
-	if len(ips) > 0 {
-		cdn, cdnbyip, cdnbyheader, cdnbycidr, cdnbyasn, cdnbycname = config.GetCdnInfoByAll(
-			resp, ips, "./data/cdn_header_keys.json",
-			cidr, "./data/cdn_ip_cidr.json",
-			asn, "./data/cdn_asn_list.json",
-			cname, "./data/cdn_cname_keywords.json")
-	}
-
-	result = Result{
+	baseInfo := ResponseResult{
 		Url:                    url,
 		Title:                  title,
 		Banner:                 Banner,
 		StatusCode:             statusCode,
-		CName:                  cname,
-		IP:                     ips,
 		Alive:                  alive,
 		ContentLength:          contentLength,
 		ContentLengthByAllBody: contentLengthByAllBody,
 		ResponseHeader:         responseHeader,
-		Cdn:                    cdn,
-		CdnByIP:                cdnbyip,
-		CdnByHeader:            cdnbyheader,
-		CdnByCidr:              cdnbycidr,
-		CdnByAsn:               cdnbyasn,
-		CdnByCName:             cdnbycname,
-		Cidr:                   cidr,
-		Asn:                    asn,
-		Org:                    org,
-		Addr:                   addr,
+	}
+
+	var (
+		cdn          int
+		cdnbyip      bool
+		cdnbyheader  string
+		cdnbycidr    bool
+		cdnbyasn     bool
+		cdnbycname   bool
+		passiveInfos PassiveResult
+	)
+	if passive {
+		cname, ips := config.GetCNameIPByDomain(url, "./data/vaildResolvers.txt")
+		if len(ips) == 0 {
+			return Result{}
+		}
+		cidr, asn, org, addr := config.GetAsnInfoByIp(ips, proxy)
+
+		if len(ips) > 0 {
+			cdn, cdnbyip, cdnbyheader, cdnbycidr, cdnbyasn, cdnbycname = config.GetCdnInfoByAll(
+				resp, ips, "./data/cdn_header_keys.json",
+				cidr, "./data/cdn_ip_cidr.json",
+				asn, "./data/cdn_asn_list.json",
+				cname, "./data/cdn_cname_keywords.json")
+		}
+
+		passiveInfos = PassiveResult{
+			CName:       cname,
+			IP:          ips,
+			Cdn:         cdn,
+			CdnByIP:     cdnbyip,
+			CdnByHeader: cdnbyheader,
+			CdnByCidr:   cdnbycidr,
+			CdnByAsn:    cdnbyasn,
+			CdnByCName:  cdnbycname,
+			Cidr:        cidr,
+			Asn:         asn,
+			Org:         org,
+			Addr:        addr,
+		}
+	}
+
+	result = Result{
+		BaseInfo:    baseInfo,
+		PassiveInfo: passiveInfos,
 	}
 	return
 }
 
-func ProcessURLFromLine(url, proxy string, usehttps bool, followredirects bool, maxredirects int, method string, randomuseragent bool, headers string, followsamehost bool, timeout int, rateLimit int, res bool, resultFile string) {
+func ProcessURLFromLine(url, proxy string, usehttps bool, followredirects bool, maxredirects int, method string, randomuseragent bool, headers string, followsamehost bool, timeout int, rateLimit int, res bool, resultFile string, passive bool) {
 	// Create a wait group to wait for all Goroutines to complete
 	var wg sync.WaitGroup
 
@@ -192,7 +212,7 @@ func ProcessURLFromLine(url, proxy string, usehttps bool, followredirects bool, 
 
 			// Perform the request and processing
 			result := processURL(url, proxy, usehttps, followredirects, maxredirects, method,
-				randomuseragent, headers, followsamehost, timeout)
+				randomuseragent, headers, followsamehost, timeout, passive)
 
 			if !isResultEmpty(result) {
 				// Add the result to the list.
@@ -222,7 +242,7 @@ func ProcessURLFromLine(url, proxy string, usehttps bool, followredirects bool, 
 
 }
 
-func ProcessURLFromGroup(filename, proxy string, usehttps bool, followredirects bool, maxredirects int, method string, randomuseragent bool, headers string, followsamehost bool, timeout int, processes int, rateLimit int, res bool, resultFile string) {
+func ProcessURLFromGroup(filename, proxy string, usehttps bool, followredirects bool, maxredirects int, method string, randomuseragent bool, headers string, followsamehost bool, timeout int, processes int, rateLimit int, res bool, resultFile string, passive bool) {
 	// Create a wait group to wait for all Goroutines to complete
 	var wg sync.WaitGroup
 
@@ -260,7 +280,7 @@ func ProcessURLFromGroup(filename, proxy string, usehttps bool, followredirects 
 
 			// Perform the request and processing
 			result := processURL(url, proxy, usehttps, followredirects, maxredirects, method,
-				randomuseragent, headers, followsamehost, timeout)
+				randomuseragent, headers, followsamehost, timeout, passive)
 
 			if !isResultEmpty(result) {
 				// Add the result to the list
@@ -291,7 +311,7 @@ func ProcessURLFromGroup(filename, proxy string, usehttps bool, followredirects 
 	}
 }
 
-func ProcessURLFromPipe(urlPipe []string, proxy string, usehttps bool, followredirects bool, maxredirects int, method string, randomuseragent bool, headers string, followsamehost bool, timeout int, processes int, rateLimit int, res bool, resultFile string) {
+func ProcessURLFromPipe(urlPipe []string, proxy string, usehttps bool, followredirects bool, maxredirects int, method string, randomuseragent bool, headers string, followsamehost bool, timeout int, processes int, rateLimit int, res bool, resultFile string, passive bool) {
 	// Create a wait group to wait for all Goroutines to complete
 	var wg sync.WaitGroup
 
@@ -323,7 +343,7 @@ func ProcessURLFromPipe(urlPipe []string, proxy string, usehttps bool, followred
 
 			// Perform the request and processing
 			result := processURL(url, proxy, usehttps, followredirects, maxredirects, method,
-				randomuseragent, headers, followsamehost, timeout)
+				randomuseragent, headers, followsamehost, timeout, passive)
 
 			if !isResultEmpty(result) {
 				// Add the result to the list
