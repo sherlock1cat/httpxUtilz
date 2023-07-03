@@ -7,30 +7,6 @@ import (
 	"net/http"
 )
 
-//ToDoList
-//	Alive      int    `bson:"alive"` Done
-//	URL        string `bson:"url"`
-//	Subdomain  string `bson:"subdomain"`
-//	Level      int    `bson:"level"`
-//	CName      string `bson:"cname"` Done
-//	IP         string `bson:"ip"` Done
-//	CDN        int    `bson:"cdn"` Done
-//	CdnInfo	   string `bson:"cdn_info"` Done
-//	Port       int    `bson:"port"`
-//	Status     int    `bson:"status"` Done
-//	Reason     string `bson:"reason"`
-//	Title      string `bson:"title"` Done
-//	Banner     string `bson:"banner"` Done
-//	CIDR       string `bson:"cidr"`
-//	ASN        string `bson:"asn"`
-//	Org        string `bson:"org"`
-//	Addr       string `bson:"addr"`
-//	ISP        string `bson:"isp"`
-//	Source     string `bson:"source"`
-//	CreateDate string `bson:"create_date"`
-//	UpdateDate string `bson:"update_date"`
-//}
-
 type Response struct {
 	Raw                    string
 	Data                   []byte
