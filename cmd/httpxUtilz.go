@@ -30,8 +30,10 @@ type PassiveResult struct {
 type ResponseResult struct {
 	Url                    string   `json:"url"`
 	Title                  string   `json:"title"`
-	Banner                 string   `json:"banner"`
-	StatusCode             int      `json:"statusCode"`
+	Server                 string   `json:"server"`
+	Via                    string   `json:"via"`
+	Power                  string   `json:"x-powered-by"`
+	StatusCode             int      `json:"status_code"`
 	Alive                  int      `json:"alive"`
 	ContentLength          int64    `json:"content_length"`
 	ContentLengthByAllBody int64    `json:"content_length_by_all_body"`
@@ -126,7 +128,7 @@ func processURL(url, proxy string, usehttps bool, followredirects bool, maxredir
 	}
 
 	title := config.GetTitleByResponse(resp)
-	Banner := config.GetServerByResponse(resp)
+	server, via, power := config.GetBannerByResponse(resp)
 	statusCode := config.GetStatusByResponse(resp)
 	contentLength := config.GetContentLengthByResponse(resp)
 	contentLengthByAllBody := config.GetContentLengthAllBodyByResponse(resp)
@@ -136,7 +138,9 @@ func processURL(url, proxy string, usehttps bool, followredirects bool, maxredir
 	baseInfo := ResponseResult{
 		Url:                    url,
 		Title:                  title,
-		Banner:                 Banner,
+		Server:                 server,
+		Via:                    via,
+		Power:                  power,
 		StatusCode:             statusCode,
 		Alive:                  alive,
 		ContentLength:          contentLength,

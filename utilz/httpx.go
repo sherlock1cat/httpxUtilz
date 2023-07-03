@@ -59,19 +59,19 @@ func (config *RequestClientConfig) GetTitleByResponse(resp *Response) (title str
 	return
 }
 
-func (config *RequestClientConfig) GetServerByResponse(resp *Response) (Banner string) {
-	server := resp.Headers.Get("Server")
-	if len(server) > 0 {
-		Banner = server + ","
+func (config *RequestClientConfig) GetBannerByResponse(resp *Response) (server, via, power string) {
+	if len(resp.Headers.Get("Server")) > 0 {
+		server = resp.Headers.Get("Server")
 	}
-	via := resp.Headers.Get("Via")
-	if len(via) > 0 {
-		Banner += via + ","
+
+	if len(resp.Headers.Get("Via")) > 0 {
+		via = resp.Headers.Get("Via")
 	}
-	power := resp.Headers.Get("X-Powered-By")
-	if len(power) > 0 {
-		Banner += power
+
+	if len(resp.Headers.Get("X-Powered-By")) > 0 {
+		power = resp.Headers.Get("X-Powered-By")
 	}
+
 	return
 }
 
