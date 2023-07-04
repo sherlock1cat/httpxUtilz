@@ -8,41 +8,25 @@ import (
 	"os"
 )
 
-var (
-	url             string
-	urls            string
-	proxy           string
-	usehttps        bool
-	followredirects bool
-	maxredirects    int
-	method          string
-	randomuseragent bool
-	headers         string
-	followsamehost  bool
-	timeout         int
-	processes       int
-	rateLimit       int
-	res             bool
-	resultFile      string
-	passive         bool
-)
+var params cmd.ProcessUrlParams
 
 func init() {
-	flag.StringVar(&url, "url", "", "URL to process.")
-	flag.StringVar(&urls, "urls", "", "File URLs to process.")
-	flag.StringVar(&proxy, "proxy", "", "Proxy URL.")
-	flag.BoolVar(&usehttps, "usehttps", true, "Initiate an HTTPS request.")
-	flag.BoolVar(&followredirects, "followredirects", true, "Perform a URL request redirection.")
-	flag.IntVar(&maxredirects, "maxredirects", 10, "Maximum number of redirections.")
-	flag.StringVar(&method, "method", "GET", "The default request method is GET.")
-	flag.BoolVar(&randomuseragent, "randomuseragent", true, "Whether to use a random User-Agent header.")
-	flag.StringVar(&headers, "headers", "", "Customize the request headers.")
-	flag.BoolVar(&followsamehost, "followsamehost", true, "Follow Same Host.")
-	flag.IntVar(&processes, "processes", 1, "Number of processes.")
-	flag.IntVar(&rateLimit, "rateLimit", 100, "Rate limit.")
-	flag.BoolVar(&res, "res", false, "Default not save result.")
-	flag.StringVar(&resultFile, "resultFile", "", "Default save to ./result.json.")
-	flag.BoolVar(&passive, "passive", false, "Default not get passive info data.")
+	flag.StringVar(&params.Url, "url", "", "URL to process.")
+	flag.StringVar(&params.Filename, "urls", "", "File URLs to process.")
+	flag.StringVar(&params.Proxy, "proxy", "", "Proxy URL.")
+	flag.BoolVar(&params.UseHTTPS, "usehttps", true, "Initiate an HTTPS request.")
+	flag.BoolVar(&params.FollowRedirects, "followredirects", true, "Perform a URL request redirection.")
+	flag.IntVar(&params.MaxRedirects, "maxredirects", 10, "Maximum number of redirections.")
+	flag.StringVar(&params.Method, "method", "GET", "The default request method is GET.")
+	flag.BoolVar(&params.RandomUserAgent, "randomuseragent", true, "Whether to use a random User-Agent header.")
+	flag.StringVar(&params.Headers, "headers", "", "Customize the request headers.")
+	flag.BoolVar(&params.FollowSameHost, "followsamehost", true, "Follow Same Host.")
+	flag.IntVar(&params.Timeout, "timeout", 10, "Request url timeout.")
+	flag.IntVar(&params.Processes, "processes", 1, "Number of processes.")
+	flag.IntVar(&params.RateLimit, "rateLimit", 50, "Rate limit.")
+	flag.BoolVar(&params.Res, "res", false, "Default not save result.")
+	flag.StringVar(&params.ResultFile, "resultFile", "", "Default save to ./result.json.")
+	flag.BoolVar(&params.Passive, "passive", false, "Default not get passive info data.")
 	flag.Parse()
 }
 
@@ -51,20 +35,20 @@ func main() {
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
 		scanner := bufio.NewScanner(os.Stdin)
-		var urlPipe []string
+
 		for scanner.Scan() {
-			urlPipe = append(urlPipe, scanner.Text())
+			params.URLPipe = append(params.URLPipe, scanner.Text())
 		}
 		if err := scanner.Err(); err != nil {
 			fmt.Println("Unable to read from the pipe input:", err)
 			return
 		}
-		cmd.ProcessURLFromPipe(urlPipe, proxy, usehttps, followredirects, maxredirects, method, randomuseragent, headers, followredirects, timeout, processes, rateLimit, res, resultFile, passive)
+		cmd.ProcessURLFromPipe(params)
 	} else {
-		if url != "" {
-			cmd.ProcessURLFromLine(url, proxy, usehttps, followredirects, maxredirects, method, randomuseragent, headers, followredirects, timeout, rateLimit, res, resultFile, passive)
-		} else if urls != "" {
-			cmd.ProcessURLFromGroup(urls, proxy, usehttps, followredirects, maxredirects, method, randomuseragent, headers, followredirects, timeout, processes, rateLimit, res, resultFile, passive)
+		if params.Url != "" {
+			cmd.ProcessURLFromLine(params)
+		} else if params.Filename != "" {
+			cmd.ProcessURLFromGroup(params)
 		} else {
 			flag.Usage()
 		}

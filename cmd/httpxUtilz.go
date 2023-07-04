@@ -45,6 +45,26 @@ type Result struct {
 	PassiveInfo PassiveResult  `json:"passive_info"`
 }
 
+type ProcessUrlParams struct {
+	URLPipe         []string
+	Url             string
+	Filename        string
+	Proxy           string
+	UseHTTPS        bool
+	FollowRedirects bool
+	MaxRedirects    int
+	Method          string
+	RandomUserAgent bool
+	Headers         string
+	FollowSameHost  bool
+	Timeout         int
+	Processes       int
+	RateLimit       int
+	Res             bool
+	ResultFile      string
+	Passive         bool
+}
+
 func readURLsFromFile(filename string) ([]string, error) {
 	file, err := os.Open(filename)
 	if err != nil {
@@ -106,22 +126,22 @@ func saveResultsToFile(results []Result, resultFile string) {
 	log.Println("results saved to", resultFile)
 }
 
-func processURL(url, proxy string, usehttps bool, followredirects bool, maxredirects int, method string, randomuseragent bool, headers string, followsamehost bool, timeout int, passive bool) (result Result) {
+func processURL(params ProcessUrlParams) (result Result) {
 	config := httpxUtilz.RequestClientConfig{
-		ProxyURL:        proxy,
-		UseHTTPS:        usehttps,
-		FollowRedirects: followredirects,
-		MaxRedirects:    maxredirects,
-		Method:          method,
-		RandomUserAgent: randomuseragent,
+		ProxyURL:        params.Proxy,
+		UseHTTPS:        params.UseHTTPS,
+		FollowRedirects: params.FollowRedirects,
+		MaxRedirects:    params.MaxRedirects,
+		Method:          params.Method,
+		RandomUserAgent: params.RandomUserAgent,
 		Headers: map[string]string{
-			"User-Agent": headers,
+			"User-Agent": params.Headers,
 		},
-		FollowSameHost: followsamehost,
-		Timeout:        time.Duration(timeout),
+		FollowSameHost: params.FollowSameHost,
+		Timeout:        time.Duration(params.Timeout),
 	}
 
-	resp, err := config.GetResponseByUrl(url)
+	resp, err := config.GetResponseByUrl(params.Url)
 	if err != nil {
 		log.Println("processURL>  request error: ", err)
 		return
@@ -136,7 +156,7 @@ func processURL(url, proxy string, usehttps bool, followredirects bool, maxredir
 	alive := config.GetAliveByResponse(resp)
 
 	baseInfo := ResponseResult{
-		Url:                    url,
+		Url:                    params.Url,
 		Title:                  title,
 		Server:                 server,
 		Via:                    via,
@@ -157,12 +177,12 @@ func processURL(url, proxy string, usehttps bool, followredirects bool, maxredir
 		cdnbycname   bool
 		passiveInfos PassiveResult
 	)
-	if passive {
-		cname, ips := config.GetCNameIPByDomain(url, "./data/vaildResolvers.txt")
+	if params.Passive {
+		cname, ips := config.GetCNameIPByDomain(params.Url, "./data/vaildResolvers.txt")
 		if len(ips) == 0 {
 			return Result{}
 		}
-		cidr, asn, org, addr := config.GetAsnInfoByIp(ips, proxy)
+		cidr, asn, org, addr := config.GetAsnInfoByIp(ips, params.Proxy)
 
 		if len(ips) > 0 {
 			cdn, cdnbyip, cdnbyheader, cdnbycidr, cdnbyasn, cdnbycname = config.GetCdnInfoByAll(
@@ -195,12 +215,12 @@ func processURL(url, proxy string, usehttps bool, followredirects bool, maxredir
 	return
 }
 
-func ProcessURLFromLine(url, proxy string, usehttps bool, followredirects bool, maxredirects int, method string, randomuseragent bool, headers string, followsamehost bool, timeout int, rateLimit int, res bool, resultFile string, passive bool) {
+func ProcessURLFromLine(params ProcessUrlParams) {
 	// Create a wait group to wait for all Goroutines to complete
 	var wg sync.WaitGroup
 
 	// Create a channel to limit the rate of requests
-	rateLimiter := time.Tick(time.Second / time.Duration(rateLimit))
+	rateLimiter := time.Tick(time.Second / time.Duration(params.RateLimit))
 
 	// Create a list of results
 	results := make([]Result, 0)
@@ -215,8 +235,7 @@ func ProcessURLFromLine(url, proxy string, usehttps bool, followredirects bool, 
 			<-rateLimiter
 
 			// Perform the request and processing
-			result := processURL(url, proxy, usehttps, followredirects, maxredirects, method,
-				randomuseragent, headers, followsamehost, timeout, passive)
+			result := processURL(params)
 
 			if !isResultEmpty(result) {
 				// Add the result to the list.
@@ -230,7 +249,7 @@ func ProcessURLFromLine(url, proxy string, usehttps bool, followredirects bool, 
 
 				fmt.Println(string(jsonData))
 			} else {
-				log.Println(url + " can't get result")
+				log.Println(params.Url + " can't get result")
 			}
 
 		}()
@@ -240,23 +259,23 @@ func ProcessURLFromLine(url, proxy string, usehttps bool, followredirects bool, 
 	wg.Wait()
 
 	// Save the results to a JSON file
-	if res {
-		saveResultsToFile(results, resultFile)
+	if params.Res && len(results) > 0 {
+		saveResultsToFile(results, params.ResultFile)
 	}
 
 }
 
-func ProcessURLFromGroup(filename, proxy string, usehttps bool, followredirects bool, maxredirects int, method string, randomuseragent bool, headers string, followsamehost bool, timeout int, processes int, rateLimit int, res bool, resultFile string, passive bool) {
+func ProcessURLFromGroup(params ProcessUrlParams) {
 	// Create a wait group to wait for all Goroutines to complete
 	var wg sync.WaitGroup
 
 	// Create a channel to limit the rate of requests
-	rateLimiter := time.Tick(time.Second / time.Duration(rateLimit))
+	rateLimiter := time.Tick(time.Second / time.Duration(params.RateLimit))
 
 	// Create a list of results
 	results := make([]Result, 0)
 
-	urls, err := readURLsFromFile(filename)
+	urls, err := readURLsFromFile(params.Filename)
 	if err != nil {
 		log.Println("failed to read URLs from file:", err)
 		return
@@ -265,12 +284,9 @@ func ProcessURLFromGroup(filename, proxy string, usehttps bool, followredirects 
 	// Create a Goroutine pool to limit the concurrency
 	pool := &sync.Pool{
 		New: func() interface{} {
-			return make(chan struct{}, processes)
+			return make(chan struct{}, params.Processes)
 		},
 	}
-
-	// Create an exit signal channel.
-	exitSignal := make(chan struct{})
 
 	// Initiate multiple Goroutines for concurrent processing
 	for _, url := range urls {
@@ -283,14 +299,10 @@ func ProcessURLFromGroup(filename, proxy string, usehttps bool, followredirects 
 
 			//Retrieve a Goroutine from the Goroutine pool
 			token := pool.Get().(chan struct{})
-			defer func() {
-				// Release the Goroutine back to the Goroutine pool
-				token <- struct{}{}
-			}()
 
 			// Perform the request and processing
-			result := processURL(url, proxy, usehttps, followredirects, maxredirects, method,
-				randomuseragent, headers, followsamehost, timeout, passive)
+			params.Url = url
+			result := processURL(params)
 
 			if !isResultEmpty(result) {
 				// Add the result to the list
@@ -307,14 +319,8 @@ func ProcessURLFromGroup(filename, proxy string, usehttps bool, followredirects 
 				log.Println(url + " can't get result")
 			}
 
-			// Check exit signal
-			select {
-			case <-exitSignal:
-				return
-			default:
-				// Release the Goroutine back to the Goroutine pool
-				token <- struct{}{}
-			}
+			// Release the Goroutine back to the Goroutine pool
+			pool.Put(token)
 		}(url)
 	}
 
@@ -322,17 +328,17 @@ func ProcessURLFromGroup(filename, proxy string, usehttps bool, followredirects 
 	wg.Wait()
 
 	// Save the results to a JSON file
-	if res {
-		saveResultsToFile(results, resultFile)
+	if params.Res && len(results) > 0 {
+		saveResultsToFile(results, params.ResultFile)
 	}
 }
 
-func ProcessURLFromPipe(urlPipe []string, proxy string, usehttps bool, followredirects bool, maxredirects int, method string, randomuseragent bool, headers string, followsamehost bool, timeout int, processes int, rateLimit int, res bool, resultFile string, passive bool) {
+func ProcessURLFromPipe(params ProcessUrlParams) {
 	// Create a wait group to wait for all Goroutines to complete
 	var wg sync.WaitGroup
 
 	// Create a channel to limit the rate of requests
-	rateLimiter := time.Tick(time.Second / time.Duration(rateLimit))
+	rateLimiter := time.Tick(time.Second / time.Duration(params.RateLimit))
 
 	// Create a list of results
 	results := make([]Result, 0)
@@ -340,15 +346,12 @@ func ProcessURLFromPipe(urlPipe []string, proxy string, usehttps bool, followred
 	// Create a Goroutine pool to limit the concurrency
 	pool := &sync.Pool{
 		New: func() interface{} {
-			return make(chan struct{}, processes)
+			return make(chan struct{}, params.Processes)
 		},
 	}
 
-	// Create an exit signal channel.
-	exitSignal := make(chan struct{})
-
 	// Initiate multiple Goroutines for concurrent processing
-	for _, url := range urlPipe {
+	for _, url := range params.URLPipe {
 		wg.Add(1)
 		go func(url string) {
 			defer wg.Done()
@@ -358,14 +361,10 @@ func ProcessURLFromPipe(urlPipe []string, proxy string, usehttps bool, followred
 
 			// Retrieve a Goroutine from the Goroutine pool
 			token := pool.Get().(chan struct{})
-			defer func() {
-				// Release the Goroutine back to the Goroutine pool
-				token <- struct{}{}
-			}()
 
 			// Perform the request and processing
-			result := processURL(url, proxy, usehttps, followredirects, maxredirects, method,
-				randomuseragent, headers, followsamehost, timeout, passive)
+			params.Url = url
+			result := processURL(params)
 
 			if !isResultEmpty(result) {
 				// Add the result to the list
@@ -383,14 +382,8 @@ func ProcessURLFromPipe(urlPipe []string, proxy string, usehttps bool, followred
 				return
 			}
 
-			// Check exit signal
-			select {
-			case <-exitSignal:
-				return
-			default:
-				// Release the Goroutine back to the Goroutine pool
-				token <- struct{}{}
-			}
+			// Release the Goroutine back to the Goroutine pool
+			pool.Put(token)
 		}(url)
 	}
 
@@ -398,9 +391,7 @@ func ProcessURLFromPipe(urlPipe []string, proxy string, usehttps bool, followred
 	wg.Wait()
 
 	// Save the results to a JSON file
-	if res {
-		saveResultsToFile(results, resultFile)
+	if params.Res && len(results) > 0 {
+		saveResultsToFile(results, params.ResultFile)
 	}
-	// Send an exit signal when the program exits.
-	close(exitSignal)
 }

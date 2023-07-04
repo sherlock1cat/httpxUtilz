@@ -64,25 +64,26 @@ httpxUtilz supports the following command-line arguments:
 - `-rateLimit`: Rate limit (default: 100).
 - `-res`: Save the result (default: false).
 - `-resultFile`: File to save the result (default: ./result.json).
+- `-passive`: Default not get passive info data.
 
 ## Examples
 
 ### Process a Single URL
 "Determine the ./data directory in the current directory"
 ```
-./httpxUtilz -url https://www.hackerone.com
+./httpxUtilz -url=https://www.hackerone.com
 ```
 
 ### Process URL List File
 
 ```
-./httpxUtilz -urls urls.txt
+./httpxUtilz -urls=urls.txt
 ```
 
 ### More Options
 
 ```
-./httpxUtilz -url https://www.hackerone.com -proxy http://127.0.0.1:1080 -usehttps true -followredirects true -maxredirects 5 -method POST -randomuseragent true -headers "Authorization: Bearer token" -followsamehost true -processes 2 -rateLimit 100 -res true -resultFile result.json
+cat url.txt | httpx -slient | ./httpxUtilz -proxy=http://127.0.0.1:1080 -maxredirects=5 -method=POST -randomuseragent=true -processes=50 -rateLimit=100 -res=true -resultFile=./result.json
 ```
 
 ## As Library
