@@ -47,7 +47,7 @@ You can install the dependencies using the following command:
    ```
 
 ## Method 2: Download Compiled File.
-[click download httpxUtilz](https://github.com/sherlock1cat/httpxUtilz/releases/latest)
+[click](https://github.com/sherlock1cat/httpxUtilz/releases/latest)
  
    ```
    mkdir httpxutilz
