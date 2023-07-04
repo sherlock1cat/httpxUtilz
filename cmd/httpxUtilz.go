@@ -68,7 +68,7 @@ type ProcessUrlParams struct {
 func readURLsFromFile(filename string) ([]string, error) {
 	file, err := os.Open(filename)
 	if err != nil {
-		log.Fatal("readURLsFromFile: Open File Error", err)
+		log.Println("readURLsFromFile: Open File Error", err)
 		return nil, err
 	}
 	defer file.Close()
@@ -81,7 +81,7 @@ func readURLsFromFile(filename string) ([]string, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal("readURLsFromFile: Read File Error", err)
+		log.Println("readURLsFromFile: Read File Error", err)
 		return nil, err
 	}
 
@@ -104,7 +104,7 @@ func saveResultsToFile(results []Result, resultFile string) {
 	// Create the result file
 	file, err := os.OpenFile(resultFile, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		log.Println("create result file error:", err)
+		log.Println("saveResultsToFile> create result file error:", err)
 		return
 	}
 	defer file.Close()
@@ -112,14 +112,14 @@ func saveResultsToFile(results []Result, resultFile string) {
 	// Convert the result to a JSON string.
 	jsonData, err := json.Marshal(results)
 	if err != nil {
-		log.Println("json marshal error:", err)
+		log.Println("saveResultsToFile> json marshal error:", err)
 		return
 	}
 
 	// Write the JSON string to a file
 	_, err = file.Write(jsonData)
 	if err != nil {
-		log.Println("write result to file error:", err)
+		log.Println("saveResultsToFile> write result to file error:", err)
 		return
 	}
 
@@ -243,7 +243,7 @@ func ProcessURLFromLine(params ProcessUrlParams) {
 
 				jsonData, err := json.Marshal(result)
 				if err != nil {
-					log.Println("json marshal error:", err)
+					log.Println("ProcessURLFromLine> json marshal error:", err)
 					return
 				}
 
@@ -277,7 +277,7 @@ func ProcessURLFromGroup(params ProcessUrlParams) {
 
 	urls, err := readURLsFromFile(params.Filename)
 	if err != nil {
-		log.Println("failed to read URLs from file:", err)
+		log.Println("ProcessURLFromGroup> failed to read URLs from file:", err)
 		return
 	}
 
@@ -310,7 +310,7 @@ func ProcessURLFromGroup(params ProcessUrlParams) {
 
 				jsonData, err := json.Marshal(result)
 				if err != nil {
-					log.Println("json marshal error:", err)
+					log.Println("ProcessURLFromGroup> json marshal error:", err)
 					return
 				}
 
@@ -372,7 +372,7 @@ func ProcessURLFromPipe(params ProcessUrlParams) {
 
 				jsonData, err := json.Marshal(result)
 				if err != nil {
-					log.Println("json marshal error:", err)
+					log.Println("ProcessURLFromPipe> json marshal error:", err)
 					return
 				}
 

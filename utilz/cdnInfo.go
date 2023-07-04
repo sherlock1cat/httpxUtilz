@@ -13,14 +13,14 @@ import (
 func ReadJSONFile(filename string) ([]string, error) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
-		log.Fatalf("ReadJSONFile: Failed to read the file：%v", err)
+		log.Printf("ReadJSONFile: Failed to read the file：%v", err)
 		return nil, err
 	}
 
 	var value []string
 	err = json.Unmarshal(data, &value)
 	if err != nil {
-		log.Fatalf("ReadJSONFile: Failed to parse JSON：%v", err)
+		log.Printf("ReadJSONFile: Failed to parse JSON：%v", err)
 		return nil, err
 	}
 
@@ -30,14 +30,14 @@ func ReadJSONFile(filename string) ([]string, error) {
 func ReadCNameJSONFile(filename string) (map[string]string, error) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
-		log.Fatalf("ReadJSONFile: Failed to read the file：%v", err)
+		log.Printf("ReadJSONFile: Failed to read the file：%v", err)
 		return nil, err
 	}
 
 	var value map[string]string
 	err = json.Unmarshal([]byte(data), &value)
 	if err != nil {
-		log.Fatalf("ReadJSONFile: Failed to parse JSON：%v", err)
+		log.Printf("ReadJSONFile: Failed to parse JSON：%v", err)
 		return nil, err
 	}
 
@@ -125,7 +125,7 @@ func GetCDNInfoByAsn(asn, CdnAsnfilename string) (cdn int, cdnbyasn bool) {
 func GetCDNInfoByCName(cname, CdnCNamefilename string) (cdn int, cdnbycname bool) {
 	cnameMap, err := ReadCNameJSONFile(CdnCNamefilename)
 	if err != nil {
-		log.Fatal("GetCDNInfoByAsn: Failed to handle the JSON file：", err)
+		log.Println("GetCDNInfoByAsn: Failed to handle the JSON file：", err)
 		return
 	}
 

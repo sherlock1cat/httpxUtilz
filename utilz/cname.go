@@ -12,7 +12,7 @@ import (
 func FileContentToList(filePath string) []string {
 	fileContent, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		log.Fatal("fail to open file: " + filePath)
+		log.Println("fail to open file: " + filePath)
 		return nil
 	}
 	contentList := strings.Split(string(fileContent), "\n")
@@ -44,7 +44,7 @@ func DnsxClient(domain string, resolversFile string) *dnsx.DNSX {
 
 	dnsxClient, err := dnsx.New(DefaultOptions)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("DnsxClient> ", err)
 		return nil
 	}
 	return dnsxClient
@@ -52,7 +52,11 @@ func DnsxClient(domain string, resolversFile string) *dnsx.DNSX {
 
 func GetCnameIPsByDomain(url string, resolversFile string) (cname string, ips string) {
 
-	domain := GetSubDomain(url)
+	domain, err := GetSubDomain(url)
+	if err != nil {
+		log.Printf("GetCnameIPsByDomain> %s getsubdomain failed, check url format.")
+		return
+	}
 	dnsxClient := DnsxClient(domain, resolversFile)
 
 	dnsxResult, _ := dnsxClient.QueryOne(domain)

@@ -1,18 +1,20 @@
 package utilz
 
 import (
+	"errors"
 	"log"
 	"strings"
 )
 
-func GetSubDomain(url string) (domain string) {
+func GetSubDomain(url string) (domain string, err error) {
 	domain = url
 	// Extract the domain portion.
 	if strings.Contains(url, "://") {
 		domainParts := strings.Split(url, "://")
 		if len(domainParts) != 2 {
-			log.Fatal("GetSubDomain: Invalid domain name")
-			return
+			log.Println("GetSubDomain: Invalid domain name")
+			err := errors.New("GetSubDomain: Invalid domain name")
+			return "", err
 		}
 		domain = domainParts[1]
 	}
@@ -29,5 +31,5 @@ func GetSubDomain(url string) (domain string) {
 		domain = domainParts[0]
 	}
 
-	return
+	return domain, nil
 }

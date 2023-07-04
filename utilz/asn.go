@@ -17,11 +17,13 @@ type AsnData struct {
 func handleInput(client *asnmap.Client, item string) *AsnData {
 	results, err := client.GetData(item)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return nil
 	}
 	output, err := asnmap.GetFormattedDataInJson(results)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return nil
 	}
 	var data AsnData
 	if len(output) > 0 {
@@ -29,7 +31,8 @@ func handleInput(client *asnmap.Client, item string) *AsnData {
 
 		err := json.Unmarshal([]byte(output), &data)
 		if err != nil {
-			log.Fatalf("handleInput: Failed to parse JSON：%v", err)
+			log.Printf("handleInput: Failed to parse JSON：%v", err)
+			return nil
 		}
 	}
 	return &data
@@ -42,7 +45,8 @@ func GetAsnInfoByIps(ips string, proxy string) (cidr, asn, org, addr string) {
 		_, err = client.SetProxy(proxys)
 	}
 	if err != nil {
-		log.Fatal("GetAsnInfoByIps: asnmap new client ", err)
+		log.Println("GetAsnInfoByIps> asnmap new client ", err)
+		return
 	}
 	items := strings.Split(ips, ",")
 
@@ -54,7 +58,7 @@ func GetAsnInfoByIps(ips string, proxy string) (cidr, asn, org, addr string) {
 		org = data.AsName
 		addr = data.AsCountry
 
-		return cidr, asn, org, addr
+		return
 	}
 	return
 }
