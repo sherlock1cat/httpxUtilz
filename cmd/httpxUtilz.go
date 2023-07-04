@@ -63,6 +63,7 @@ type ProcessUrlParams struct {
 	Res             bool
 	ResultFile      string
 	Passive         bool
+	Base            bool
 }
 
 func readURLsFromFile(filename string) ([]string, error) {
@@ -141,19 +142,35 @@ func processURL(params ProcessUrlParams) (result Result) {
 		Timeout:        time.Duration(params.Timeout),
 	}
 
-	resp, err := config.GetResponseByUrl(params.Url)
-	if err != nil {
-		log.Println("processURL>  request error: ", err)
-		return
-	}
+	var (
+		title                  string
+		server                 string
+		via                    string
+		power                  string
+		statusCode             int
+		alive                  int
+		contentLength          int64
+		contentLengthByAllBody int64
+		responseHeader         []string
+		resp                   *httpxUtilz.Response
+		err                    error
+	)
 
-	title := config.GetTitleByResponse(resp)
-	server, via, power := config.GetBannerByResponse(resp)
-	statusCode := config.GetStatusByResponse(resp)
-	alive := config.GetAliveByResponse(resp)
-	contentLength := config.GetContentLengthByResponse(resp)
-	contentLengthByAllBody := config.GetContentLengthAllBodyByResponse(resp)
-	responseHeader := config.GetServerAllHeaderByResponse(resp)
+	if params.Base {
+		resp, err = config.GetResponseByUrl(params.Url)
+		if err != nil {
+			log.Println("processURL>  request error: ", err)
+			return
+		}
+
+		title = config.GetTitleByResponse(resp)
+		server, via, power = config.GetBannerByResponse(resp)
+		statusCode = config.GetStatusByResponse(resp)
+		alive = config.GetAliveByResponse(resp)
+		contentLength = config.GetContentLengthByResponse(resp)
+		contentLengthByAllBody = config.GetContentLengthAllBodyByResponse(resp)
+		responseHeader = config.GetServerAllHeaderByResponse(resp)
+	}
 
 	baseInfo := ResponseResult{
 		Url:                    params.Url,
@@ -185,6 +202,15 @@ func processURL(params ProcessUrlParams) (result Result) {
 		cidr, asn, org, addr := config.GetAsnInfoByIp(ips, params.Proxy)
 
 		if len(ips) > 0 {
+
+			if !params.Base { // not get baseinfo, but cdnbyheader need response
+				resp, err = config.GetResponseByUrl(params.Url)
+				if err != nil {
+					log.Println("processURL>  request error: ", err)
+					return
+				}
+			}
+
 			cdn, cdnbyip, cdnbyheader, cdnbycidr, cdnbyasn, cdnbycname = config.GetCdnInfoByAll(
 				resp, ips, "./data/cdn_header_keys.json",
 				cidr, "./data/cdn_ip_cidr.json",

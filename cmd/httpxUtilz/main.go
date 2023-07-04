@@ -26,6 +26,7 @@ func init() {
 	flag.IntVar(&params.RateLimit, "rateLimit", 50, "Rate limit.")
 	flag.BoolVar(&params.Res, "res", false, "Default not save result.")
 	flag.StringVar(&params.ResultFile, "resultFile", "", "Default save to ./result.json.")
+	flag.BoolVar(&params.Base, "base", true, "Default not get base info data.")
 	flag.BoolVar(&params.Passive, "passive", false, "Default not get passive info data.")
 	flag.Parse()
 }
