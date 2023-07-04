@@ -150,10 +150,10 @@ func processURL(params ProcessUrlParams) (result Result) {
 	title := config.GetTitleByResponse(resp)
 	server, via, power := config.GetBannerByResponse(resp)
 	statusCode := config.GetStatusByResponse(resp)
+	alive := config.GetAliveByResponse(resp)
 	contentLength := config.GetContentLengthByResponse(resp)
 	contentLengthByAllBody := config.GetContentLengthAllBodyByResponse(resp)
 	responseHeader := config.GetServerAllHeaderByResponse(resp)
-	alive := config.GetAliveByResponse(resp)
 
 	baseInfo := ResponseResult{
 		Url:                    params.Url,
