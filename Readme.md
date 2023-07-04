@@ -90,7 +90,7 @@ cat url.txt | httpx -slient | ./httpxUtilz -proxy=http://127.0.0.1:1080 -maxredi
 - search vul information by waybackurl
 
 ```
-echo "hackerone.com" | waybackurls -no-subs | ./httpxUtilz -randomuseragent=true -processes=50 -rateLimit=100 -base=false -mayvul=true -res=true -resultFile=./mayvul_result.json
+echo "hackerone.com" | waybackurls -no-subs | httpx -slient | ./httpxUtilz -randomuseragent=true -processes=50 -rateLimit=100 -base=false -mayvul=true -res=true -resultFile=./mayvul_result.json
 ```
 
 ## As Library
