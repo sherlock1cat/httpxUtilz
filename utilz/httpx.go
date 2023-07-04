@@ -19,20 +19,20 @@ type Response struct {
 func (config *RequestClientConfig) GetResponseByUrl(targetUrl string) (*Response, error) {
 	target, err := parseUrl(targetUrl)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("GetResponseByUrl: ", err)
 		return nil, err
 	}
 	client := NewRequestClient(*config)
 	resp, err := client.Get(target)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("GetResponseByUrl: ", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("GetResponseByUrl: ", err)
 		return nil, err
 	}
 

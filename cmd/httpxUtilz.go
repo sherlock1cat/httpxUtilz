@@ -123,7 +123,7 @@ func processURL(url, proxy string, usehttps bool, followredirects bool, maxredir
 
 	resp, err := config.GetResponseByUrl(url)
 	if err != nil {
-		log.Println("request error: ", err)
+		log.Println("processURL>  request error: ", err)
 		return
 	}
 
@@ -269,6 +269,9 @@ func ProcessURLFromGroup(filename, proxy string, usehttps bool, followredirects 
 		},
 	}
 
+	// Create an exit signal channel.
+	exitSignal := make(chan struct{})
+
 	// Initiate multiple Goroutines for concurrent processing
 	for _, url := range urls {
 		wg.Add(1)
@@ -280,7 +283,10 @@ func ProcessURLFromGroup(filename, proxy string, usehttps bool, followredirects 
 
 			//Retrieve a Goroutine from the Goroutine pool
 			token := pool.Get().(chan struct{})
-			defer pool.Put(token)
+			defer func() {
+				// Release the Goroutine back to the Goroutine pool
+				token <- struct{}{}
+			}()
 
 			// Perform the request and processing
 			result := processURL(url, proxy, usehttps, followredirects, maxredirects, method,
@@ -301,8 +307,14 @@ func ProcessURLFromGroup(filename, proxy string, usehttps bool, followredirects 
 				log.Println(url + " can't get result")
 			}
 
-			// Release the Goroutine back to the Goroutine pool
-			token <- struct{}{}
+			// Check exit signal
+			select {
+			case <-exitSignal:
+				return
+			default:
+				// Release the Goroutine back to the Goroutine pool
+				token <- struct{}{}
+			}
 		}(url)
 	}
 
@@ -332,6 +344,9 @@ func ProcessURLFromPipe(urlPipe []string, proxy string, usehttps bool, followred
 		},
 	}
 
+	// Create an exit signal channel.
+	exitSignal := make(chan struct{})
+
 	// Initiate multiple Goroutines for concurrent processing
 	for _, url := range urlPipe {
 		wg.Add(1)
@@ -343,7 +358,10 @@ func ProcessURLFromPipe(urlPipe []string, proxy string, usehttps bool, followred
 
 			// Retrieve a Goroutine from the Goroutine pool
 			token := pool.Get().(chan struct{})
-			defer pool.Put(token)
+			defer func() {
+				// Release the Goroutine back to the Goroutine pool
+				token <- struct{}{}
+			}()
 
 			// Perform the request and processing
 			result := processURL(url, proxy, usehttps, followredirects, maxredirects, method,
@@ -362,10 +380,17 @@ func ProcessURLFromPipe(urlPipe []string, proxy string, usehttps bool, followred
 				fmt.Println(string(jsonData))
 			} else {
 				log.Println(url + " can't get result")
+				return
 			}
 
-			// Release the Goroutine back to the Goroutine pool
-			token <- struct{}{}
+			// Check exit signal
+			select {
+			case <-exitSignal:
+				return
+			default:
+				// Release the Goroutine back to the Goroutine pool
+				token <- struct{}{}
+			}
 		}(url)
 	}
 
@@ -376,4 +401,6 @@ func ProcessURLFromPipe(urlPipe []string, proxy string, usehttps bool, followred
 	if res {
 		saveResultsToFile(results, resultFile)
 	}
+	// Send an exit signal when the program exits.
+	close(exitSignal)
 }
