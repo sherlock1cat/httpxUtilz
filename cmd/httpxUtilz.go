@@ -40,9 +40,14 @@ type ResponseResult struct {
 	ResponseHeader         []string `json:"response_header"`
 }
 
+type MatchResponseResult struct {
+	MayVul map[string]string `json:"may_vul"`
+}
+
 type Result struct {
-	BaseInfo    ResponseResult `json:"base_info"`
-	PassiveInfo PassiveResult  `json:"passive_info"`
+	BaseInfo    ResponseResult      `json:"base_info"`
+	PassiveInfo PassiveResult       `json:"passive_info"`
+	RegexInfo   MatchResponseResult `json:"regex_info"`
 }
 
 type ProcessUrlParams struct {
@@ -64,6 +69,7 @@ type ProcessUrlParams struct {
 	ResultFile      string
 	Passive         bool
 	Base            bool
+	MayVul          bool
 }
 
 func readURLsFromFile(filename string) ([]string, error) {
@@ -234,9 +240,25 @@ func processURL(params ProcessUrlParams) (result Result) {
 		}
 	}
 
+	var (
+		matchResponseResult MatchResponseResult
+	)
+
+	if params.MayVul {
+		if !params.Base { // not get baseinfo, but regex matches need response
+			resp, err = config.GetResponseByUrl(params.Url)
+			if err != nil {
+				log.Println("processURL>  request error: ", err)
+				return
+			}
+		}
+		matchResponseResult.MayVul = config.GetMayVulInfoByRespone(resp, "./data/regex_MayVul.json")
+	}
+
 	result = Result{
 		BaseInfo:    baseInfo,
 		PassiveInfo: passiveInfos,
+		RegexInfo:   matchResponseResult,
 	}
 	return
 }

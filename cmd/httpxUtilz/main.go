@@ -28,6 +28,7 @@ func init() {
 	flag.StringVar(&params.ResultFile, "resultFile", "", "Default save to ./result.json.")
 	flag.BoolVar(&params.Base, "base", true, "Default not get base info data.")
 	flag.BoolVar(&params.Passive, "passive", false, "Default not get passive info data.")
+	flag.BoolVar(&params.MayVul, "mayvul", false, "Default not get may vul info data.")
 	flag.Parse()
 }
 

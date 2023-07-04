@@ -54,7 +54,7 @@ func GetCnameIPsByDomain(url string, resolversFile string) (cname string, ips st
 
 	domain, err := GetSubDomain(url)
 	if err != nil {
-		log.Printf("GetCnameIPsByDomain> %s getsubdomain failed, check url format.")
+		log.Printf("GetCnameIPsByDomain> %s getsubdomain failed, check url format.", url)
 		return
 	}
 	dnsxClient := DnsxClient(domain, resolversFile)

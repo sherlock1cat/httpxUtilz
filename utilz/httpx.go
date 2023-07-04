@@ -127,3 +127,9 @@ func (config *RequestClientConfig) GetAsnInfoByIp(ips string, proxy string) (cid
 	cidr, asn, org, addr = GetAsnInfoByIps(ips, proxy)
 	return
 }
+
+func (config *RequestClientConfig) GetMayVulInfoByRespone(resp *Response, rulesFiles string) (vulMatches map[string]string) {
+	vulMatches = MatchResponseWithJSONRules(resp.Raw, rulesFiles)
+
+	return
+}

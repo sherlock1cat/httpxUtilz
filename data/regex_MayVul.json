@@ -1,0 +1,14 @@
+{
+  "OSS": "([Aa]ccess[Kk]ey[Ii][dD]|[Aa]ccess[Kk]ey[Ss]ecret)",
+  "Amazon AWS URL": "(((([a-zA-Z0-9\\.\\-_]+\\.s3|s3)(\\.|\\-)+[a-zA-Z0-9\\.\\-_]+|[a-zA-Z0-9\\.\\-_]+\\.s3|s3)\\.amazonaws\\.com)|(s3:\\/\\/[a-zA-Z0-9-\\.\\_]+)|(s3\\.console\\.aws\\.amazon\\.com\\/s3\\/buckets\\/[a-zA-Z0-9-\\.\\_]+)|(amzn\\.mws\\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})|(ec2-[0-9-]+\\.cd-[a-z0-9-]+\\.compute\\.amazonaws\\.com)|(us[_-]?east[_-]?1[_-]?elb[_-]?amazonaws[_-]?com))",
+  "Amazon AWS AccessKey ID": "'[^0-9]((aws(.{0,20})?(?-i)[''\\\"][0-9a-zA-Z\\/+]{40}[''\\\"])|((A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)))",
+  "Amazon AWS Region": "((us(-gov)?|ap|ca|cn|eu|sa)-(central|(north|south)?(east|west)?)-\\d)",
+  "SSH Private Key": "([-]+BEGIN [^\\s]+ PRIVATE KEY[-])",
+  "WeCom Key": "([cC]or[pP]id|[cC]orp[sS]ecret)",
+  "Windows File/Dir Path": "'[^\\w](([a-zA-Z]:\\\\(?:\\w+\\\\?)*)|([a-zA-Z]:\\\\(?:\\w+\\\\)*\\w+\\.\\w+))'",
+  "JDBC Connection": "(jdbc:[a-z:]+://[a-z0-9\\.\\-_:;=/@?,&]+)",
+  "Github Access Token": "([a-z0-9_-]*:[a-z0-9_\\-]+@github\\.com*)",
+  "Microsoft Teams Webhook": "(https://outlook\\.office\\.com/webhook/[a-z0-9@-]+/IncomingWebhook/[a-z0-9-]+/[a-z0-9-]+)",
+  "Zoho Webhook": "(https://creator\\.zoho\\.com/api/[a-z0-9/_.\\-]+\\?authtoken=[a-z0-9]+)",
+  "Sonarqube Token": "(sonar\\.{0,50}(?:\"|\\'|`)?[0-9a-f]{40}(?:\"|\\'|`)?)"
+}
