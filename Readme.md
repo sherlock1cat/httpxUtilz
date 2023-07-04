@@ -19,7 +19,7 @@ You can install the dependencies using the following command:
    go mod tidy
    ```
 
-## Installation
+## Method 1: Installation By Code
 
 1. Clone or download this repository.
 
@@ -46,8 +46,20 @@ You can install the dependencies using the following command:
    ./cmd/httpxUtilz -h
    ```
 
-## Or use compiled file.
-> https://github.com/sherlock1cat/httpxUtilz/releases/latest
+## Method 1: Download Compiled File.
+[click download httpxUtilz](https://github.com/sherlock1cat/httpxUtilz/releases/latest)
+ 
+   ```
+   mkdir httpxutilz
+   unzip httpxUtilz_0.0.8_linux_amd64.zip -d ./httpxutilz
+   cd httpxutilz
+   mkdir test && cd test
+   git clone https://github.com/sherlock1cat/httpxUtilz.git && cd httpxUtilz
+   mv ./data ../../
+   cd ../../
+   rm -rf test
+   ./httpxUtilz -h
+   ```
 
 ## Usage
 
