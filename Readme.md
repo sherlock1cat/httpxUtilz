@@ -70,7 +70,7 @@ httpxUtilz supports the following command-line arguments:
 ## Examples
 
 ### Process a Single URL
-"Determine the ./data directory in the current directory"
+**Determine the ./data directory in the current directory**
 ```
 ./httpxUtilz -url=https://www.hackerone.com
 ```
