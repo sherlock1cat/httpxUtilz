@@ -34,7 +34,7 @@ func NewRequestClient(config RequestClientConfig) *http.Client {
 	if config.Method == "" {
 		config.Method = "GET"
 	}
-	if config.RandomUserAgent && len(config.Headers["User-Agent"]) == 0 {
+	if config.RandomUserAgent || len(config.Headers["User-Agent"]) == 0 {
 		config.Headers["User-Agent"] = getRandomUserAgent()
 	}
 	if config.FollowSameHost && config.MaxRedirects == 0 {

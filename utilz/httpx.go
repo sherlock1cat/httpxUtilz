@@ -56,20 +56,32 @@ func (config *RequestClientConfig) GetAliveByResponse(resp *Response) (alive int
 
 func (config *RequestClientConfig) GetTitleByResponse(resp *Response) (title string) {
 	title = ExtractTitle(resp)
+	if len(title) == 0 {
+		title = "NA"
+	}
 	return
 }
 
 func (config *RequestClientConfig) GetBannerByResponse(resp *Response) (server, via, power string) {
 	if len(resp.Headers.Get("Server")) > 0 {
 		server = resp.Headers.Get("Server")
+		if len(server) == 0 {
+			server = "NA"
+		}
 	}
 
 	if len(resp.Headers.Get("Via")) > 0 {
 		via = resp.Headers.Get("Via")
+		if len(via) == 0 {
+			via = "NA"
+		}
 	}
 
 	if len(resp.Headers.Get("X-Powered-By")) > 0 {
 		power = resp.Headers.Get("X-Powered-By")
+		if len(power) == 0 {
+			power = "NA"
+		}
 	}
 
 	return
@@ -102,6 +114,9 @@ func (config *RequestClientConfig) GetContentLengthAllBodyByResponse(resp *Respo
 
 func (config *RequestClientConfig) GetCNameIPByDomain(domain string, resolversFile string) (cname string, ips string) {
 	cname, ips = GetCnameIPsByDomain(domain, resolversFile)
+	if len(cname) == 0 {
+		cname = "NA"
+	}
 	return
 }
 
