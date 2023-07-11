@@ -30,6 +30,8 @@ func NewRequestClient(config RequestClientConfig) *http.Client {
 	}
 	if config.FollowRedirects && config.MaxRedirects == 0 {
 		config.MaxRedirects = 10
+	} else if !config.FollowRedirects {
+		config.MaxRedirects = 0
 	}
 	if config.Method == "" {
 		config.Method = "GET"
