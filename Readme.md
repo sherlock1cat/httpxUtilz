@@ -10,6 +10,7 @@ httpxUtilz relies on the following third-party packages:
 - github.com/projectdiscovery/dnsx
 - github.com/projectdiscovery/cdncheck
 - github.com/projectdiscovery/asnmap
+- github.com/gh0stkey/HaE
 
 Make sure to install these dependencies before building and running httpxUtilz.
 
