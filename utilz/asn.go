@@ -68,3 +68,17 @@ func GetAsnInfoByIps(ips string, proxy string) (cidr, asn, org, addr string) {
 	}
 	return
 }
+
+func GetIpsByAsnmap(url string) (ips string) {
+	domain, err := GetSubDomain(url)
+	if err != nil {
+		log.Printf("GetIpsByAsnmap> %s getsubdomain failed, check url format.", url)
+		return
+	}
+	resolvedIps, err := asnmap.ResolveDomain(domain)
+	if err != nil {
+		log.Fatal(err)
+	}
+	ips = strings.Join(resolvedIps, ",")
+	return
+}
