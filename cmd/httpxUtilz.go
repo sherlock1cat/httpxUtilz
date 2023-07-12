@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	httpxUtilz "httpxUtilz/utilz"
@@ -102,35 +103,51 @@ func isResultEmpty(result Result) bool {
 	return reflect.DeepEqual(result, emptyResult)
 }
 
-func saveResultsToFile(results []Result, resultFile string) {
-	// The default path for the result file is "./result.json"
-	if resultFile == "" {
-		resultFile = "./result.json"
-	}
+//func saveResultsToFile(results []Result, resultFile string) {
+//	// The default path for the result file is "./result.json"
+//	if resultFile == "" {
+//		resultFile = "./result.json"
+//	}
+//
+//	// Create the result file
+//	file, err := os.OpenFile(resultFile, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0666)
+//	if err != nil {
+//		log.Println("saveResultsToFile> create result file error:", err)
+//		return
+//	}
+//	defer file.Close()
+//
+//	// Convert the result to a JSON string.
+//	jsonData, err := json.Marshal(results)
+//	if err != nil {
+//		log.Println("saveResultsToFile> json marshal error:", err)
+//		return
+//	}
+//
+//	// Write the JSON string to a file
+//	_, err = file.Write(jsonData)
+//	if err != nil {
+//		log.Println("saveResultsToFile> write result to file error:", err)
+//		return
+//	}
+//
+//	log.Println("results saved to", resultFile)
+//}
 
-	// Create the result file
-	file, err := os.OpenFile(resultFile, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0666)
+// writes the content of the buffer to the specified file
+func WriteBufferToFile(buffer *bytes.Buffer, filePath string) error {
+	// The default path for the result file is "./result.json"
+	if filePath == "" {
+		filePath = "./result.json"
+	}
+	file, err := os.OpenFile(filePath, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		log.Println("saveResultsToFile> create result file error:", err)
-		return
+		return fmt.Errorf("WriteBufferToFile> failed to create file: %w", err)
 	}
 	defer file.Close()
 
-	// Convert the result to a JSON string.
-	jsonData, err := json.Marshal(results)
-	if err != nil {
-		log.Println("saveResultsToFile> json marshal error:", err)
-		return
-	}
-
-	// Write the JSON string to a file
-	_, err = file.Write(jsonData)
-	if err != nil {
-		log.Println("saveResultsToFile> write result to file error:", err)
-		return
-	}
-
-	log.Println("results saved to", resultFile)
+	_, err = buffer.WriteTo(file)
+	return err
 }
 
 func processURL(params ProcessUrlParams) (result Result) {
@@ -273,6 +290,9 @@ func ProcessURLFromLine(params ProcessUrlParams) {
 	// Create a list of results
 	results := make([]Result, 0)
 
+	// Create a buffer to store the results temporarily
+	var buffer bytes.Buffer
+
 	// Initiate multiple Goroutines for concurrent processing
 	for i := 0; i < 1; i++ {
 		wg.Add(1)
@@ -296,6 +316,9 @@ func ProcessURLFromLine(params ProcessUrlParams) {
 				}
 
 				fmt.Println(string(jsonData))
+
+				buffer.WriteString(string(jsonData))
+				buffer.WriteString("\n")
 			} else {
 				log.Println(params.Url + " can't get result")
 			}
@@ -307,10 +330,14 @@ func ProcessURLFromLine(params ProcessUrlParams) {
 	wg.Wait()
 
 	// Save the results to a JSON file
-	if params.Res && len(results) > 0 {
-		saveResultsToFile(results, params.ResultFile)
+	if params.Res && buffer.Len() > 0 {
+		//saveResultsToFile(results, params.ResultFile)
+		err := WriteBufferToFile(&buffer, params.ResultFile)
+		if err != nil {
+			fmt.Println("WriteBufferToFile Error:", err)
+			return
+		}
 	}
-
 }
 
 func ProcessURLFromGroup(params ProcessUrlParams) {
@@ -322,6 +349,9 @@ func ProcessURLFromGroup(params ProcessUrlParams) {
 
 	// Create a list of results
 	results := make([]Result, 0)
+
+	// Create a buffer to store the results temporarily
+	var buffer bytes.Buffer
 
 	urls, err := readURLsFromFile(params.Filename)
 	if err != nil {
@@ -363,6 +393,9 @@ func ProcessURLFromGroup(params ProcessUrlParams) {
 				}
 
 				fmt.Println(string(jsonData))
+
+				buffer.WriteString(string(jsonData))
+				buffer.WriteString("\n")
 			} else {
 				log.Println(url + " can't get result")
 			}
@@ -376,8 +409,13 @@ func ProcessURLFromGroup(params ProcessUrlParams) {
 	wg.Wait()
 
 	// Save the results to a JSON file
-	if params.Res && len(results) > 0 {
-		saveResultsToFile(results, params.ResultFile)
+	if params.Res && buffer.Len() > 0 {
+		//saveResultsToFile(results, params.ResultFile)
+		err := WriteBufferToFile(&buffer, params.ResultFile)
+		if err != nil {
+			fmt.Println("WriteBufferToFile Error:", err)
+			return
+		}
 	}
 }
 
@@ -390,6 +428,9 @@ func ProcessURLFromPipe(params ProcessUrlParams) {
 
 	// Create a list of results
 	results := make([]Result, 0)
+
+	// Create a buffer to store the results temporarily
+	var buffer bytes.Buffer
 
 	// Create a Goroutine pool to limit the concurrency
 	pool := &sync.Pool{
@@ -425,6 +466,9 @@ func ProcessURLFromPipe(params ProcessUrlParams) {
 				}
 
 				fmt.Println(string(jsonData))
+
+				buffer.WriteString(string(jsonData))
+				buffer.WriteString("\n")
 			} else {
 				log.Println(url + " can't get result")
 				return
@@ -439,7 +483,12 @@ func ProcessURLFromPipe(params ProcessUrlParams) {
 	wg.Wait()
 
 	// Save the results to a JSON file
-	if params.Res && len(results) > 0 {
-		saveResultsToFile(results, params.ResultFile)
+	if params.Res && buffer.Len() > 0 {
+		//saveResultsToFile(results, params.ResultFile)
+		err := WriteBufferToFile(&buffer, params.ResultFile)
+		if err != nil {
+			fmt.Println("WriteBufferToFile Error:", err)
+			return
+		}
 	}
 }
