@@ -44,11 +44,10 @@ func ReadCNameJSONFile(filename string) (map[string]string, error) {
 	return value, nil
 }
 
-func GetCDNInfoByIps(ips string) (cdn int, cdnbyip bool) {
+func GetCDNInfoByIps(ips []string) (cdn int, cdnbyip bool) {
 	client := cdncheck.New()
-	ipList := strings.Split(ips, ",")
 
-	for _, ipStr := range ipList {
+	for _, ipStr := range ips {
 		ip := net.ParseIP(strings.TrimSpace(ipStr))
 		if ip == nil {
 			//log.Println("GetCDNInfoByIps: Invalid IP address: ", ipStr)
@@ -83,14 +82,14 @@ func GetCDNInfoByHeader(resp *Response, CdnHeaderfilename string) (cdn int, cdnb
 	return
 }
 
-func GetCDNInfoByCidr(cidr string, CdnCidrfilename string) (cdn int, cdnbycidr bool) {
+func GetCDNInfoByCidr(cidr []string, CdnCidrfilename string) (cdn int, cdnbycidr bool) {
 	cdnCidrs, err := ReadJSONFile(CdnCidrfilename)
 	if err != nil {
 		log.Fatal("GetCDNInfoByCidr: Encountered an error while processing the JSON file：", err)
 		return
 	}
-	cidrRange := strings.Split(cidr, ",")
-	for _, checkCidr := range cidrRange {
+
+	for _, checkCidr := range cidr {
 		for _, value := range cdnCidrs {
 			if value == checkCidr && value != "" {
 				cdnbycidr = true
@@ -102,15 +101,14 @@ func GetCDNInfoByCidr(cidr string, CdnCidrfilename string) (cdn int, cdnbycidr b
 	return
 }
 
-func GetCDNInfoByAsn(asn, CdnAsnfilename string) (cdn int, cdnbyasn bool) {
+func GetCDNInfoByAsn(asn []string, CdnAsnfilename string) (cdn int, cdnbyasn bool) {
 	cdnAsn, err := ReadJSONFile(CdnAsnfilename)
 	if err != nil {
 		log.Fatal("GetCDNInfoByAsn: Failed to handle the JSON file：", err)
 		return
 	}
 
-	asnRange := strings.Split(asn, ",")
-	for _, checkAsn := range asnRange {
+	for _, checkAsn := range asn {
 		for _, value := range cdnAsn {
 			if value == checkAsn && value != "" {
 				cdnbyasn = true
@@ -122,15 +120,14 @@ func GetCDNInfoByAsn(asn, CdnAsnfilename string) (cdn int, cdnbyasn bool) {
 	return
 }
 
-func GetCDNInfoByCName(cname, CdnCNamefilename string) (cdn int, cdnbycname bool) {
+func GetCDNInfoByCName(cname []string, CdnCNamefilename string) (cdn int, cdnbycname bool) {
 	cnameMap, err := ReadCNameJSONFile(CdnCNamefilename)
 	if err != nil {
 		log.Println("GetCDNInfoByAsn: Failed to handle the JSON file：", err)
 		return
 	}
 
-	cnameRange := strings.Split(cname, ",")
-	for _, checkCName := range cnameRange {
+	for _, checkCName := range cname {
 		_, ok := cnameMap[checkCName]
 		if !ok {
 			continue

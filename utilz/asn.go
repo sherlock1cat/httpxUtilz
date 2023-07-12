@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	asnmap "github.com/projectdiscovery/asnmap/libs"
 	"log"
-	"strings"
 )
 
 type AsnData struct {
@@ -38,7 +37,7 @@ func handleInput(client *asnmap.Client, item string) *AsnData {
 	return &data
 }
 
-func GetAsnInfoByIps(ips string, proxy string) (cidr, asn, org, addr string) {
+func GetAsnInfoByIps(ips []string, proxy string) (cidr, asn, org, addr []string) {
 	client, err := asnmap.NewClient()
 	if proxy != "" {
 		proxys := []string{proxy}
@@ -48,37 +47,35 @@ func GetAsnInfoByIps(ips string, proxy string) (cidr, asn, org, addr string) {
 		log.Println("GetAsnInfoByIps> asnmap new client ", err)
 		return
 	}
-	items := strings.Split(ips, ",")
 
-	for _, item := range items { // Retrieve the first result.
+	for _, item := range ips { // Retrieve result have value break.
 		data := handleInput(client, item)
-		if data != nil {
-			cidr += strings.Join(data.AsRange, ",")
-			asn += data.AsNumber
-			org += data.AsName
-			addr += data.AsCountry
+		if data != nil && len(cidr) == 0 && len(asn) == 0 && len(org) == 0 && len(addr) == 0 {
+			cidr = data.AsRange
+			asn = append(asn, data.AsNumber)
+			org = append(org, data.AsName)
+			addr = append(addr, data.AsCountry)
 		} else {
-			log.Printf("GetAsnInfoByIps> asnmap can't get data by %s", ips)
+			log.Printf("GetAsnInfoByIps> asnmap can't get data by %s", item)
 			//cidr = "Na"
 			//asn = "Na"
 			//org = "Na"
 			//addr = "Na"
 		}
-		return
 	}
 	return
 }
 
-func GetIpsByAsnmap(url string) (ips string) {
+func GetIpsByAsnmap(url string) (ips []string) {
 	domain, err := GetSubDomain(url)
 	if err != nil {
 		log.Printf("GetIpsByAsnmap> %s getsubdomain failed, check url format.", url)
 		return
 	}
-	resolvedIps, err := asnmap.ResolveDomain(domain)
+	ips, err = asnmap.ResolveDomain(domain)
 	if err != nil {
 		log.Fatal(err)
 	}
-	ips = strings.Join(resolvedIps, ",")
+
 	return
 }

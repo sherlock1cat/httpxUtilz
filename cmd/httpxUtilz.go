@@ -7,6 +7,7 @@ import (
 	"fmt"
 	httpxUtilz "httpxUtilz/utilz"
 	"log"
+	"net"
 	"os"
 	"reflect"
 	"sync"
@@ -14,18 +15,18 @@ import (
 )
 
 type PassiveResult struct {
-	CName       string   `json:"cname"`
-	IP          string   `json:"ip"`
+	CName       []string `json:"cname"`
+	IP          []string `json:"ip"`
 	Cdn         int      `json:"cdn"`
 	CdnByIP     bool     `json:"cdn_by_ip"`
 	CdnByHeader []string `json:"cdn_by_header"`
 	CdnByCidr   bool     `json:"cdn_by_cidr"`
 	CdnByAsn    bool     `json:"cdn_by_asn"`
 	CdnByCName  bool     `json:"cdn_by_cname"`
-	Cidr        string   `json:"cidr"`
-	Asn         string   `json:"asn"`
-	Org         string   `json:"org"`
-	Addr        string   `json:"addr"`
+	Cidr        []string `json:"cidr"`
+	Asn         []string `json:"asn"`
+	Org         []string `json:"org"`
+	Addr        []string `json:"addr"`
 }
 
 type ResponseResult struct {
@@ -150,6 +151,26 @@ func WriteBufferToFile(buffer *bytes.Buffer, filePath string) error {
 	return err
 }
 
+func UniquerIps(cnameIps, resolveIps []string) (ips []string) {
+	uniqueIPs := make(map[string]bool)
+
+	for _, ip := range cnameIps {
+		uniqueIPs[ip] = true
+	}
+
+	for _, ip := range resolveIps {
+		uniqueIPs[ip] = true
+	}
+
+	for ip := range uniqueIPs {
+		// check ipv6
+		if ipAddr := net.ParseIP(ip); ipAddr != nil {
+			ips = append(ips, ip)
+		}
+	}
+	return
+}
+
 func processURL(params ProcessUrlParams) (result Result) {
 	config := httpxUtilz.RequestClientConfig{
 		ProxyURL:        params.Proxy,
@@ -220,7 +241,7 @@ func processURL(params ProcessUrlParams) (result Result) {
 	if params.Passive {
 		cname, cnameIps := config.GetCNameIPByDomain(params.Url, "./data/vaildResolvers.txt")
 		resolveIps := config.GetIpsByAsnmap(params.Url)
-		ips := cnameIps + resolveIps
+		ips := UniquerIps(cnameIps, resolveIps)
 		if len(ips) == 0 {
 			return Result{}
 		}
@@ -237,10 +258,10 @@ func processURL(params ProcessUrlParams) (result Result) {
 			}
 
 			cdn, cdnbyip, cdnbyheader, cdnbycidr, cdnbyasn, cdnbycname = config.GetCdnInfoByAll(
-				resp, ips, "./data/cdn_header_keys.json",
-				cidr, "./data/cdn_ip_cidr.json",
-				asn, "./data/cdn_asn_list.json",
-				cname, "./data/cdn_cname_keywords.json")
+				resp, ips, cidr, asn, cname, "./data/cdn_header_keys.json",
+				"./data/cdn_ip_cidr.json",
+				"./data/cdn_asn_list.json",
+				"./data/cdn_cname_keywords.json")
 		}
 
 		passiveInfos = PassiveResult{

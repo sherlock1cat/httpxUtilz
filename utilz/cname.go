@@ -50,7 +50,7 @@ func DnsxClient(domain string, resolversFile string) *dnsx.DNSX {
 	return dnsxClient
 }
 
-func GetCnameIPsByDomain(url string, resolversFile string) (cname string, ips string) {
+func GetCnameIPsByDomain(url string, resolversFile string) (cname, ips []string) {
 
 	domain, err := GetSubDomain(url)
 	if err != nil {
@@ -63,8 +63,8 @@ func GetCnameIPsByDomain(url string, resolversFile string) (cname string, ips st
 	CName := dnsxResult.CNAME
 	IPs := dnsxResult.A
 
-	cname = strings.Join(CName, ",")
-	ips = strings.Join(IPs, ",")
+	cname = CName
+	ips = IPs
 
 	return
 }

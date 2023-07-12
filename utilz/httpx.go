@@ -112,20 +112,20 @@ func (config *RequestClientConfig) GetContentLengthAllBodyByResponse(resp *Respo
 	return
 }
 
-func (config *RequestClientConfig) GetCNameIPByDomain(domain string, resolversFile string) (cname string, ips string) {
+func (config *RequestClientConfig) GetCNameIPByDomain(domain string, resolversFile string) (cname, ips []string) {
 	cname, ips = GetCnameIPsByDomain(domain, resolversFile)
 	if len(cname) == 0 {
-		cname = "NA"
+		cname = []string{"Na"}
 	}
 	return
 }
 
-func (config *RequestClientConfig) GetIpsByAsnmap(domain string) (ips string) {
+func (config *RequestClientConfig) GetIpsByAsnmap(domain string) (ips []string) {
 	ips = GetIpsByAsnmap(domain)
 	return
 }
 
-func (config *RequestClientConfig) GetCdnInfoByAll(resp *Response, ips, CdnHeaderfilename, cidr, CdnCidrfilename, asn, CdnAsnfilename, cname, CdnCNamefilename string) (cdn int, cdnbyip bool, cdnbyheader []string, cdnbycidr, cdnbyasn, cdnbycname bool) {
+func (config *RequestClientConfig) GetCdnInfoByAll(resp *Response, ips, cidr, asn, cname []string, CdnHeaderfilename, CdnCidrfilename, CdnAsnfilename, CdnCNamefilename string) (cdn int, cdnbyip bool, cdnbyheader []string, cdnbycidr, cdnbyasn, cdnbycname bool) {
 	_, cdnbyip = GetCDNInfoByIps(ips)
 
 	_, cdnbyheader = GetCDNInfoByHeader(resp, CdnHeaderfilename)
@@ -143,7 +143,7 @@ func (config *RequestClientConfig) GetCdnInfoByAll(resp *Response, ips, CdnHeade
 	return
 }
 
-func (config *RequestClientConfig) GetAsnInfoByIp(ips string, proxy string) (cidr, asn, org, addr string) {
+func (config *RequestClientConfig) GetAsnInfoByIp(ips []string, proxy string) (cidr, asn, org, addr []string) {
 	cidr, asn, org, addr = GetAsnInfoByIps(ips, proxy)
 	return
 }
