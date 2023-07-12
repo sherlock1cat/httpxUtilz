@@ -12,8 +12,8 @@ httpxUtilz relies on the following third-party packages:
 - github.com/projectdiscovery/asnmap
 - github.com/gh0stkey/HaE
 
-Make sure to install these dependencies before building and running httpxUtilz.
-Go version : 1.19
+(Go version : 1.19)Make sure to install these dependencies before building and running httpxUtilz.
+
 You can install the dependencies using the following command:
 
    ```
