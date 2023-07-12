@@ -120,6 +120,11 @@ func (config *RequestClientConfig) GetCNameIPByDomain(domain string, resolversFi
 	return
 }
 
+func (config *RequestClientConfig) GetIpsByAsnmap(domain string) (ips string) {
+	ips = GetIpsByAsnmap(domain)
+	return
+}
+
 func (config *RequestClientConfig) GetCdnInfoByAll(resp *Response, ips, CdnHeaderfilename, cidr, CdnCidrfilename, asn, CdnAsnfilename, cname, CdnCNamefilename string) (cdn int, cdnbyip bool, cdnbyheader []string, cdnbycidr, cdnbyasn, cdnbycname bool) {
 	_, cdnbyip = GetCDNInfoByIps(ips)
 
