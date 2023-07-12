@@ -218,7 +218,9 @@ func processURL(params ProcessUrlParams) (result Result) {
 		passiveInfos PassiveResult
 	)
 	if params.Passive {
-		cname, ips := config.GetCNameIPByDomain(params.Url, "./data/vaildResolvers.txt")
+		cname, cnameIps := config.GetCNameIPByDomain(params.Url, "./data/vaildResolvers.txt")
+		resolveIps := config.GetIpsByAsnmap(params.Url)
+		ips := cnameIps + resolveIps
 		if len(ips) == 0 {
 			return Result{}
 		}
