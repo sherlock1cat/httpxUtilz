@@ -109,12 +109,6 @@ cat url.txt | httpx -slient | ./httpxUtilz -proxy=http://127.0.0.1:1080 -maxredi
 echo "hackerone.com" | waybackurls -no-subs | httpx -slient | ./httpxUtilz -randomuseragent=true -processes=50 -rateLimit=100 -base=false -mayvul=true -res=true -resultFile=./mayvul_result.json
 ```
 
-## As Library
-
-```
-go get -u https://github.com/sherlock1cat/httpxUtilz@latest
-```
-
 ## Notes
 
 - Make sure you have Go programming language environment installed.
