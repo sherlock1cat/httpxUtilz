@@ -53,16 +53,16 @@ func GetAsnInfoByIps(ips string, proxy string) (cidr, asn, org, addr string) {
 	for _, item := range items { // Retrieve the first result.
 		data := handleInput(client, item)
 		if data != nil {
-			cidr = strings.Join(data.AsRange, ",")
-			asn = data.AsNumber
-			org = data.AsName
-			addr = data.AsCountry
+			cidr += strings.Join(data.AsRange, ",")
+			asn += data.AsNumber
+			org += data.AsName
+			addr += data.AsCountry
 		} else {
 			log.Printf("GetAsnInfoByIps> asnmap can't get data by %s", ips)
-			cidr = "Na"
-			asn = "Na"
-			org = "Na"
-			addr = "Na"
+			//cidr = "Na"
+			//asn = "Na"
+			//org = "Na"
+			//addr = "Na"
 		}
 		return
 	}
